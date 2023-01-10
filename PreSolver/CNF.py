@@ -16,14 +16,10 @@ class CNF:
         self.propagate_units()
 
     def construct(self, cnf_string):
-        lines = cnf_string.strip("\n").split("\n")
+        lines = cnf_string[cnf_string.find("p cnf"):].strip("\n").split("\n")
         self.num_literals, self.num_clauses = int(lines[0].split()[-2]), int(lines[0].split()[-1])
         self.literals = [Literal(self, i) for i in range(1, self.num_literals + 1)]
         self.clauses = [Clause(i) for i in range(self.num_clauses)]
-        print("~~~~~ {} ~~~~~".format(self.num_clauses==len(lines[1:])))
-        if not self.num_clauses==len(lines[1:]):
-            print(cnf_string)
-            print(self.num_clauses, len(lines[1:]), lines[1], lines[-1])
         for index, variables in enumerate(lines[1:]):
             clause = self.clauses[index]
             variables = [(self.literals[abs(int(i))-1], np.sign(int(i))) for i in variables.split()][:-1]
@@ -44,11 +40,15 @@ class CNF:
             print("Assigning value {} to literal {}".format(not is_negation, literal.index))
         if is_negation:
             for clause in literal.affirmations:
+                if self.verbose:
+                    print("Removing variable {} from clause {}".format(literal.index, clause.index))
                 clause.remove_variable(self, literal, 1)
             while len(literal.negations) > 0:
                 self.remove_clause(literal.negations[0])
         else:
             for clause in literal.negations:
+                if self.verbose:
+                    print("Removing variable {} from clause {}".format(literal.index, clause.index))
                 clause.remove_variable(self, literal, -1)
             while len(literal.affirmations) > 0:
                 self.remove_clause(literal.affirmations[0])
@@ -62,25 +62,21 @@ class CNF:
 
     def propagate_units(self):
         while len(self.unary_clauses)>0:
-            if self.verbose:
-                print("{} unary clauses. Propagating.".format(len(self.unary_clauses)))
-            literal, is_negation = self.unary_clauses[0].variables[0]
+            clause = self.unary_clauses[0]
+            literal, is_negation = clause.variables[0]
             if self.verbose:
                 print("Removing unary clause {} with literal {} {}".format(self.unary_clauses[0].index, literal.index, not is_negation))
             self.unary_clauses = self.unary_clauses[1:]
             self.assign_literal(literal, is_negation)
 
     def remove_clause(self, clause):
-        print("Removing clause {}".format(clause.index))
+        if self.verbose:
+            print("Removing clause {}".format(clause.index))
         self.num_clauses -= 1
         for literal, sign in clause.variables:
             if sign>0:
-                if self.verbose:
-                    print("Removing clause {} of size {} from literal {}".format(clause.index, clause.size, literal.index))
                 literal.affirmations.remove(clause)
             else:
-                if self.verbose:
-                    print("Removing clause {} of size {} from literal {}".format(clause.index, clause.size, literal.index))
                 literal.negations.remove(clause)
         clause.index = None
 

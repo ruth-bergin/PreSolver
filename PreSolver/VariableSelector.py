@@ -32,19 +32,17 @@ class VariableSelector:
                 self.cnf.assign_literal(cv_ratio[VARIABLE], is_negation)
             else:
                 first_pass = False
-            if self.cnf.num_clauses < 10:
-                print(self.cnf)
             cv_ratio = self.branch_cnf()
-            if self.verbose:
-                print("Current CV ratio: {}".format(self.get_sat_probability(self.cnf)))
             if cv_ratio[TRUE] < cv_ratio[FALSE]:
                 if self.verbose:
-                    print("CV ratio of {} for True assignment is chosen instead of false value {}".format(cv_ratio[TRUE], cv_ratio[FALSE]))
+                    print("CV ratio of {} for True assignment is chosen instead of false value {}, with current ratio {}"
+                          .format(cv_ratio[TRUE], cv_ratio[FALSE], self.get_sat_probability(self.cnf)))
                 is_negation = False
                 improvement = self.get_sat_probability(self.cnf) - cv_ratio[TRUE]
             else:
                 if self.verbose:
-                    print("CV ratio of {} for False assignment is chosen instead of true value {}".format(cv_ratio[FALSE], cv_ratio[TRUE]))
+                    print("CV ratio of {} for False assignment is chosen instead of true value {}, with current ratio {}"
+                          .format(cv_ratio[FALSE], cv_ratio[TRUE], self.get_sat_probability(self.cnf)))
                 is_negation = True
                 improvement = self.get_sat_probability(self.cnf) - cv_ratio[FALSE]
         if self.cnf.num_clauses == 1:
@@ -57,12 +55,13 @@ class VariableSelector:
 
     def branch_cnf(self):
         self.cnf.rearrange()
-        cnf_branch_true = CNF(str(self.cnf))
+        cnf_branch_true = CNF(str(self.cnf), self.verbose)
         cnf_branch_false = CNF(str(self.cnf))
         next_variable = self.select_next_variable()
 
         if self.verbose:
             print("Branching CNF on {}".format(next_variable.index))
+
         cnf_branch_true.assign_literal_by_integer(next_variable.index)
         cnf_branch_true.rearrange()
         cnf_branch_false.assign_literal_by_integer(next_variable.index*-1)
