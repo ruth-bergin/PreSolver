@@ -5,12 +5,6 @@ VARIABLE, TRUE, FALSE = "variable", "true", "false"
 
 class VariableSelector:
 
-    # pick the variable with best metric
-    # assign it positive and negative
-    # choose the one with the highest improvement in SAT-probability
-    # if the improvement isn't greater than cutoff, terminate
-    # how to terminate? one large function.
-
     def __init__(self, cnf_string, cutoff=0.05, verbose=False):
         self.cnf = CNF(cnf_string, verbose=verbose)
         self.cutoff = cutoff
@@ -66,7 +60,7 @@ class VariableSelector:
         branch_false = self.create_branch(next_variable.index, -1)
         if self.solved:
             return
-        
+
         return {VARIABLE: next_variable,
                 TRUE: branch_true,
                 FALSE: branch_false}
