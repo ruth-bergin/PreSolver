@@ -18,7 +18,7 @@ class CNF:
     def construct(self, cnf_string):
         lines = cnf_string[cnf_string.find("p cnf"):].strip("\n").split("\n")
         self.num_literals, self.num_clauses = int(lines[0].split()[-2]), int(lines[0].split()[-1])
-        self.literals = [Literal(self, i) for i in range(1, self.num_literals + 1)]
+        self.literals = [Literal(i) for i in range(1, self.num_literals + 1)]
         self.clauses = [Clause(i) for i in range(self.num_clauses)]
         for index, variables in enumerate(lines[1:]):
             clause = self.clauses[index]

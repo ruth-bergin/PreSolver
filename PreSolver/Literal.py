@@ -1,7 +1,6 @@
 class Literal:
 
-    def __init__(self, instance, index):
-        self.instance = instance
+    def __init__(self, index):
         self.index = index
         self.affirmations = []
         self.negations = []
