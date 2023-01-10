@@ -19,3 +19,5 @@ example_zero.close()
 
 variable_selector_zero = VariableSelector(cnf_string_zero, cutoff= -1, verbose=True)
 reduced_cnf_zero = variable_selector_zero.run()
+
+print([str(literal) for literal in reduced_cnf_zero.literals])

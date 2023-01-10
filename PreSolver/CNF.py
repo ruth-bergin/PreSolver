@@ -70,29 +70,40 @@ class CNF:
             self.assign_literal(literal, is_negation)
 
     def remove_clause(self, clause):
+        if clause.size<2:
+            if clause in self.unary_clauses:
+                self.unary_clauses.remove(clause)
         if self.verbose:
             print("Removing clause {}".format(clause.index))
         self.num_clauses -= 1
         for literal, sign in clause.variables:
             if sign>0:
                 literal.affirmations.remove(clause)
+                literal.num_affirmations -= 1
             else:
                 literal.negations.remove(clause)
+                literal.num_negations -= 1
         clause.index = None
 
     def get_variable_from_integer(self, int):
         literal_index = abs(int)-1
         is_negation = int<0
+        if literal_index>=len(self.literals):
+            print(len(self.literals), literal_index)
+            print(self)
         literal = self.literals[literal_index]
         return literal, is_negation
 
     def rearrange(self):
         self.clauses = [clause for clause in self.clauses if clause.index is not None]
-        self.literals = [literal for literal in self.literals if literal.index is not None]
+        self.literals = [literal for literal in self.literals
+                         if literal.index is not None and literal.num_negations+literal.num_affirmations>0]
         for index, clause in enumerate(self.clauses):
             clause.index = index
         for index, literal in enumerate(self.literals):
             literal.index = index + 1
+        self.num_literals = len(self.literals)
+        self.num_clauses = len(self.clauses)
 
     def __str__(self):
         self.rearrange()
