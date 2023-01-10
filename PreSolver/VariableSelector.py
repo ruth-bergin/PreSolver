@@ -66,14 +66,9 @@ class VariableSelector:
                 FALSE: branch_false}
 
     def create_branch(self, variable, assignment):
-        verbose = variable==68
-        if verbose:
-            print("~~~~~")
-        shadow_cnf = CNF(str(self.cnf), verbose=verbose)
+        shadow_cnf = CNF(str(self.cnf))
         shadow_cnf.assign_literal_by_integer(variable*assignment)
         shadow_cnf.rearrange()
-        if verbose:
-            print(shadow_cnf)
         if shadow_cnf.num_clauses<2:
             self.cnf = shadow_cnf
             self.cnf.rearrange()

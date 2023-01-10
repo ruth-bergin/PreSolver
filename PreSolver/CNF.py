@@ -16,13 +16,15 @@ class CNF:
         self.propagate_units()
 
     def construct(self, cnf_string):
-        lines = cnf_string[cnf_string.find("p cnf"):].strip("\n").split("\n")
-        self.num_literals, self.num_clauses = int(lines[0].split()[-2]), int(lines[0].split()[-1])
+        lines = cnf_string[cnf_string.find("p cnf"):].strip("\n").split(" 0")
+        description, lines = lines[0].split("\n")[0], [lines[0].split("\n")[1]] + lines[1:]
+        lines = [line.strip("\n").strip(" ") for line in lines if line.strip("\n").strip(" ") != ""]
+        self.num_literals, self.num_clauses = int(description.split()[-2]), int(description.split()[-1])
         self.literals = [Literal(i) for i in range(1, self.num_literals + 1)]
         self.clauses = [Clause(i) for i in range(self.num_clauses)]
-        for index, variables in enumerate(lines[1:]):
+        for index, variables in enumerate(lines):
             clause = self.clauses[index]
-            variables = [(self.literals[abs(int(i))-1], np.sign(int(i))) for i in variables.split()][:-1]
+            variables = [(self.literals[abs(int(i))-1], np.sign(int(i))) for i in variables.split()]
             if len(variables)==1:
                 self.unary_clauses += [clause]
             clause.variables += variables

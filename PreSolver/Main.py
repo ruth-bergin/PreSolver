@@ -1,23 +1,56 @@
-from CNF import CNF
+from statistics import mean
+import os
 from VariableSelector import VariableSelector
+from time import time
 
-"""
-basic = open("instances/basic.txt", "r")
-cnf_string = basic.read()
-basic.close()
+def ii_dataset():
+    times = []
+    num_solved = 0
+    n = 41
 
-print(CNF(cnf_string))
-variable_selector_basic = VariableSelector(cnf_string, cutoff=-1, verbose=False)
+    path = "instances/inductive-inference"
+    for fn in os.listdir(path):
+        print(f"Executing {fn}")
+        start_time = time()
+        file = open(path+"/"+fn, "r")
+        cnf_string = file.read()
+        file.close()
 
-reduced_cnf = variable_selector_basic.run()
+        vs = VariableSelector(cnf_string, cutoff=-0.5)
+        vs.run()
 
-print(reduced_cnf)"""
+        times.append(time() - start_time)
 
-example_zero = open("instances/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_0.cnf", "r")
-cnf_string_zero = example_zero.read()
-example_zero.close()
+        if vs.solved:
+            num_solved += 1
 
-variable_selector_zero = VariableSelector(cnf_string_zero, cutoff= -1, verbose=True)
-reduced_cnf_zero = variable_selector_zero.run()
+    print("INDUCTIVE INFERENCE")
+    print("PROPORTION SOLVED:\t{}".format(num_solved / n))
+    print("MIN:\t{}\nMAX:\t{}\nMEAN:\t{}\n".format(min(times), max(times), mean(times)))
 
-print([str(literal) for literal in reduced_cnf_zero.literals])
+def CBS_dataset():
+    times = []
+    num_solved = 0
+    n = 500
+
+    for i in range(n):
+        print("Starting CNF {}".format(i))
+        start_time = time()
+        fn = "instances/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_{}.cnf".format(i)
+        file = open(fn, "r")
+        cnf_string = file.read()
+        file.close()
+
+        vs = VariableSelector(cnf_string, cutoff=-0.5)
+        vs.run()
+
+        times.append(time() - start_time)
+
+        if vs.solved:
+            num_solved += 1
+
+    print()
+    print("PROPORTION SOLVED:\t{}".format(num_solved / n))
+    print("MIN:\t{}\nMAX:\t{}\nMEAN:\t{}\n".format(min(times), max(times), mean(times)))
+
+ii_dataset()
