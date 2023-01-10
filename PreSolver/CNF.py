@@ -19,7 +19,11 @@ class CNF:
         lines = cnf_string.strip("\n").split("\n")
         self.num_literals, self.num_clauses = int(lines[0].split()[-2]), int(lines[0].split()[-1])
         self.literals = [Literal(self, i) for i in range(1, self.num_literals + 1)]
-        self.clauses = [Clause(self, i) for i in range(self.num_clauses)]
+        self.clauses = [Clause(i) for i in range(self.num_clauses)]
+        print("~~~~~ {} ~~~~~".format(self.num_clauses==len(lines[1:])))
+        if not self.num_clauses==len(lines[1:]):
+            print(cnf_string)
+            print(self.num_clauses, len(lines[1:]), lines[1], lines[-1])
         for index, variables in enumerate(lines[1:]):
             clause = self.clauses[index]
             variables = [(self.literals[abs(int(i))-1], np.sign(int(i))) for i in variables.split()][:-1]
@@ -40,19 +44,16 @@ class CNF:
             print("Assigning value {} to literal {}".format(not is_negation, literal.index))
         if is_negation:
             for clause in literal.affirmations:
-                clause.remove_variable(literal, 1)
+                clause.remove_variable(self, literal, 1)
             while len(literal.negations) > 0:
                 self.remove_clause(literal.negations[0])
         else:
             for clause in literal.negations:
-                clause.remove_variable(literal, -1)
+                clause.remove_variable(self, literal, -1)
             while len(literal.affirmations) > 0:
                 self.remove_clause(literal.affirmations[0])
         literal.index = None
         self.num_literals -= 1
-        for clause in self.clauses:
-            if clause.size==0:
-                self.remove_clause(clause)
         self.propagate_units()
 
     def assign_literal_by_integer(self, int):
@@ -70,6 +71,7 @@ class CNF:
             self.assign_literal(literal, is_negation)
 
     def remove_clause(self, clause):
+        print("Removing clause {}".format(clause.index))
         self.num_clauses -= 1
         for literal, sign in clause.variables:
             if sign>0:
@@ -106,4 +108,4 @@ class CNF:
                 except:
                     string += "error "
             string = string + "0\n"
-        return string[:-3]
+        return string

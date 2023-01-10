@@ -48,14 +48,15 @@ class VariableSelector:
                 is_negation = True
                 improvement = self.get_sat_probability(self.cnf) - cv_ratio[FALSE]
         if self.cnf.num_clauses == 1:
-            print("Finishing solving")
-            self.cnf.assign_literal(self.cnf.clauses[0].variables[0])
-            print(str(self.cnf))
-        if self.verbose:
+            if self.verbose:
+                print("Solved.")
+                print(str(self.cnf))
+        elif self.verbose:
             print("Improvement of {} did not exceed cutoff of {}. Terminating.".format(improvement, self.cutoff))
         return self.cnf
 
     def branch_cnf(self):
+        self.cnf.rearrange()
         cnf_branch_true = CNF(str(self.cnf))
         cnf_branch_false = CNF(str(self.cnf))
         next_variable = self.select_next_variable()
