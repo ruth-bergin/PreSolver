@@ -38,38 +38,49 @@ class CNF:
                     literal.num_negations += 1
 
     def assign_literal(self, literal, is_negation):
+        self.rearrange()
         if self.verbose:
             print("Assigning value {} to literal {}".format(not is_negation, literal.index))
         if is_negation:
-            for clause in literal.affirmations:
-                if self.verbose:
-                    print("Removing variable {} from clause {}".format(literal.index, clause.index))
-                clause.remove_variable(self, literal, 1)
+            if len(literal.affirmations)>0:
+                if any(clause.size<2 for clause in literal.affirmations):
+                    return -1
+                for clause in literal.affirmations:
+                    if self.verbose:
+                        print("Removing variable {} from clause {}".format(literal.index, clause.index))
+                    clause.remove_variable(self, literal, 1)
             while len(literal.negations) > 0:
                 self.remove_clause(literal.negations[0])
         else:
-            for clause in literal.negations:
-                if self.verbose:
-                    print("Removing variable {} from clause {}".format(literal.index, clause.index))
-                clause.remove_variable(self, literal, -1)
+            if len(literal.negations)>0:
+                if any(clause.size<2 for clause in literal.negations):
+                    return -1
+                for clause in literal.negations:
+                    if self.verbose:
+                        print("Removing variable {} from clause {}".format(literal.index, clause.index))
+                    clause.remove_variable(self, literal, -1)
             while len(literal.affirmations) > 0:
                 self.remove_clause(literal.affirmations[0])
         literal.index = None
         self.num_literals -= 1
         self.propagate_units()
+        self.rearrange()
+        return 0
 
     def assign_literal_by_integer(self, int):
         literal, is_negation = self.get_variable_from_integer(int)
-        self.assign_literal(literal, is_negation)
+        return self.assign_literal(literal, is_negation)
 
     def propagate_units(self):
         while len(self.unary_clauses)>0:
             clause = self.unary_clauses[0]
-            literal, is_negation = clause.variables[0]
+            literal, is_negation = clause.variables[0][0], clause.variables[0][1]<0
             if self.verbose:
-                print("Removing unary clause {} with literal {} {}".format(self.unary_clauses[0].index, literal.index, not is_negation))
+                print("Removing unary clause {} with literal {} {}".format(self.unary_clauses[0], literal.index, not is_negation))
             self.unary_clauses = self.unary_clauses[1:]
-            self.assign_literal(literal, is_negation)
+            success = self.assign_literal(literal, is_negation)
+            if success!=0 and self.verbose:
+                print(f"Contradictory unary clauses for literal {literal.index}. Aborting assignment.")
 
     def remove_clause(self, clause):
         if clause.size<2:

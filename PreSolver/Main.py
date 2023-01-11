@@ -2,6 +2,20 @@ from statistics import mean
 import os
 from VariableSelector import VariableSelector
 from time import time
+"""
+file = open("instances/basic.txt", "r")
+
+cnf_string = file.read()
+print("\n", cnf_string[cnf_string.find("p cnf"):cnf_string.find("p cnf")+17], "\n")
+file.close()
+
+vs = VariableSelector(cnf_string, cutoff=-0.5)
+reduced_cnf = vs.run()
+
+print(reduced_cnf)
+
+
+"""
 
 def ii_dataset():
     times = []
@@ -39,8 +53,9 @@ def ii_dataset():
 
 def CBS_dataset():
     times = []
+    reduction_prop = []
     num_solved = 0
-    n = 500
+    n = 100
 
     for i in range(n):
         print("Starting CNF {}".format(i))
@@ -50,16 +65,21 @@ def CBS_dataset():
         cnf_string = file.read()
         file.close()
 
+        org_num_clauses = len(cnf_string[cnf_string.find("p cnf"):].split("\n"))-1
         vs = VariableSelector(cnf_string, cutoff=-0.5)
-        vs.run()
+        reduced_cnf = vs.run()[1]
 
         times.append(time() - start_time)
 
         if vs.solved:
             num_solved += 1
+        else:
+            reduced_num_clauses = reduced_cnf.num_clauses
+            reduction_prop.append(reduced_num_clauses/org_num_clauses)
 
     print()
     print("PROPORTION SOLVED:\t{}".format(num_solved / n))
-    print("MIN:\t{}\nMAX:\t{}\nMEAN:\t{}\n".format(min(times), max(times), mean(times)))
+    print("TIMES\nMIN:\t{}\nMAX:\t{}\nMEAN:\t{}\n".format(min(times), max(times), mean(times)))
+    print("REDUCED TO PROP OF ORIGINAL\nMIN:\t{}\nMAX:\t{}\nMEAN:\t{}\n".format(min(reduction_prop), max(reduction_prop), mean(reduction_prop)))
 
-ii_dataset()
+CBS_dataset()

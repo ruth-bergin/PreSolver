@@ -10,10 +10,12 @@ class Clause:
         self.size -= 1
         if self.size==1:
             instance.unary_clauses += [self]
-        if self.size==0:
-            instance.remove_clause(self)
-            if self in instance.unary_clauses:
-                instance.unary_clauses.remove(self)
+
+    def __gt__(self, other):
+        return self.size>other.size
+
+    def __lt__(self, other):
+        return self.size<other.size
 
     def __str__(self):
-        return "{}\n{}".format(self.index, " ".join([str((literal.index*sign)) for literal,sign in self.variables]))
+        return "{} {}".format(self.index, " ".join([str((literal.index*sign)) for literal,sign in self.variables]))

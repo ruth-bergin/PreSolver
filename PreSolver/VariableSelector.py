@@ -29,25 +29,26 @@ class VariableSelector:
                 first_pass = False
             cv_ratio = self.branch_cnf()
             if self.solved:
-                break
+                if self.verbose:
+                    print("Solved.")
+                return 0, self.cnf
+            elif cv_ratio[TRUE]==0 and cv_ratio[FALSE]==0:
+                return 1, self.cnf
             elif cv_ratio[TRUE] < cv_ratio[FALSE]:
                 if self.verbose:
                     print("CV ratio of {} for True assignment is chosen instead of false value {}, with current ratio {}"
                           .format(cv_ratio[TRUE], cv_ratio[FALSE], self.get_sat_probability(self.cnf)))
                 is_negation = False
-                improvement = self.get_sat_probability(self.cnf) - cv_ratio[TRUE]
+                improvement = cv_ratio[TRUE] - self.get_sat_probability(self.cnf)
             else:
                 if self.verbose:
                     print("CV ratio of {} for False assignment is chosen instead of true value {}, with current ratio {}"
                           .format(cv_ratio[FALSE], cv_ratio[TRUE], self.get_sat_probability(self.cnf)))
                 is_negation = True
-                improvement = self.get_sat_probability(self.cnf) - cv_ratio[FALSE]
-        if self.solved:
-            if self.verbose:
-                print("Solved.")
-        elif self.verbose:
+                improvement = cv_ratio[FALSE] - self.get_sat_probability(self.cnf)
+        if self.verbose:
             print("Improvement of {} did not exceed cutoff of {}. Terminating.".format(improvement, self.cutoff))
-        return self.cnf
+        return 2, self.cnf
 
     def branch_cnf(self):
         self.cnf.rearrange()
@@ -66,19 +67,29 @@ class VariableSelector:
                 FALSE: branch_false}
 
     def create_branch(self, variable, assignment):
-        shadow_cnf = CNF(str(self.cnf))
-        shadow_cnf.assign_literal_by_integer(variable*assignment)
+        if self.verbose:
+            print(f"Beginning shadow branch for variable {variable} assignment {assignment>0}")
+        shadow_cnf = CNF(str(self.cnf), verbose=self.verbose)
+        success = shadow_cnf.assign_literal_by_integer(variable*assignment)
+        if success<0:
+            if self.verbose:
+                print(f"Ending shadow branch for variable {variable} assignment {assignment>0} - non-viable")
+            return 0
         shadow_cnf.rearrange()
         if shadow_cnf.num_clauses<2:
             self.cnf = shadow_cnf
             self.cnf.rearrange()
             self.solved = True
-            return 0
+            if self.verbose:
+                print(f"Ending shadow branch for variable {variable} assignment {assignment>0} - solved")
+            return 1
         else:
+            if self.verbose:
+                print(f"Ending shadow branch for variable {variable} assignment {assignment>0} - reduced")
             return self.get_sat_probability(shadow_cnf)
 
     def get_sat_probability(self, cnf):
-        return cnf.num_clauses/cnf.num_literals
+        return (4.2-(cnf.num_clauses/cnf.num_literals))/4.2
 
     def select_next_variable(self):
         return max(self.cnf.literals)
