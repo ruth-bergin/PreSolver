@@ -1,4 +1,4 @@
-from CNF import CNF
+from src.CNF import CNF
 
 VARIABLE, TRUE, FALSE = "variable", "true", "false"
 
