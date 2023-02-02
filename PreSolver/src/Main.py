@@ -46,8 +46,6 @@ def solve_ii_dataset():
     files = os.listdir(path)
     shuffle(files)
     for fn in files:
-        if i > 5:
-            break
         i += 1
         print(f"On file {i} ~ {fn}")
         file = open(path+"/"+fn, "r")

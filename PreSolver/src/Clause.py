@@ -26,4 +26,4 @@ class Clause:
         return self.size<other.size
 
     def __str__(self):
-        return "{} {}".format(self.index, " ".join([str((literal.index*sign)) for literal,sign in self.variables]))
+        return "{}: {}".format(self.index, " ".join([str((literal.index*sign)) for literal,sign in self.variables]))
