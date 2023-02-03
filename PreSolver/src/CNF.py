@@ -43,11 +43,11 @@ class CNF:
             for i in variables.split():
                 if np.sign(int(i)) == 0:
                     raise ValueError(f"Sign for value {i} in clause {index} is 0\nVariables:\n{variables}")
-            variables = [variable.strip("\n") for variable in variables.split(" ")]
+            variables = [variable.strip("\n") for variable in variables.split(" ") if variable!=""]
             try:
                 variables = [(self.literals[abs(int(i)) - 1], np.sign(int(i))) for i in variables]
             except Exception as e:
-                print(self.num_literals, len(variables))
+                print(self.num_literals, len(variables), "\n", variables)
                 raise e
             if len(variables) == 1:
                 self.unary_clauses += [clause]
