@@ -6,8 +6,8 @@ VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", 
 
 class VariableSelector:
 
-    def __init__(self, cnf_string, cutoff=0.5, verbose=False):
-        self.cnf = CNF(cnf_string, verbose=verbose)
+    def __init__(self, cnf_string, cutoff=0.8, verbose=False, sep=" 0\n"):
+        self.cnf = CNF(cnf_string, sep=sep)
         self.cutoff = cutoff
         self.verbose = verbose
         if self.verbose:
@@ -41,6 +41,8 @@ class VariableSelector:
                     print("Solved.")
                 return 0, self.cnf
             elif branches_sat_probability[TRUE]==0 and branches_sat_probability[FALSE]==0:
+                if self.verbose:
+                    print("Both branches unsat. Terminating.")
                 return 1, self.cnf
             elif branches_sat_probability[TRUE] > branches_sat_probability[FALSE]:
                 if self.verbose:
@@ -81,7 +83,7 @@ class VariableSelector:
     def create_branch(self, variable, assignment):
         if self.verbose:
             print(f"Beginning shadow branch for variable {variable} assignment {assignment>0}")
-        shadow_cnf = CNF(str(self.cnf), verbose=self.verbose)
+        shadow_cnf = CNF(str(self.cnf))
         success = shadow_cnf.assign_literal_by_integer(variable*assignment)
         if success<0:
             if self.verbose:

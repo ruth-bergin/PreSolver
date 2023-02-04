@@ -41,7 +41,8 @@ class DatasetPopulator:
                     else:
                         sat = shadow_cnf.solve()
                     if sat:
-                        print(f"{j} is sat for variable {variable}")
+                        if self.verbose:
+                            print(f"{j} is sat for variable {variable}")
                         valid.append((shadow_cnf, j))
                     elif random:
                         valid.append((shadow_cnf, j))
@@ -100,8 +101,6 @@ class DatasetPopulator:
             return 1
         return -1
 
-
-
     def generate_satfeatpy_dataset(self, init=False):
         print("Function called")
         file = open("../instances/main.txt", "r")
@@ -117,7 +116,7 @@ class DatasetPopulator:
         i = 0
         print("Entering for loop")
         try:
-            for filename, sat in txt[6::9]:
+            for filename, sat in txt[3::9]:
                 info = ""
                 i+=1
                 print(i, filename)
@@ -132,8 +131,6 @@ class DatasetPopulator:
         except Exception as e:
             print(f"{i+1} with value {txt[i+1]}")
             raise e
-
-    generate_satfeatpy_dataset(True)
 
     def solve_ii_dataset(self):
 

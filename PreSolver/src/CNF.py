@@ -175,7 +175,9 @@ class CNF:
         literal, is_negation = self.get_variable_from_integer(integer)
         success = self.assign_literal(literal, is_negation)
         self.rearrange()
-        print(f"Completed run of assignment of {integer}")
+        if self.verbose:
+            print(f"Completed run of assignment of {integer}")
+        print(f"Satisfiability: {self.solve()}")
         return success
 
     def get_variable_from_integer(self, integer):
