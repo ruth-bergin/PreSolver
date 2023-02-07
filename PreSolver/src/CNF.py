@@ -82,7 +82,8 @@ class CNF:
         return [[int(literal.index * sign) for literal, sign in clause.variables] for clause in self.clauses]
 
     def assign_literal(self, literal, is_negation):
-        if (literal, not is_negation) in [clause.variables[0] for clause in self.unary_clauses]:
+        self.check_for_literal_clause_inconsistency()
+        if (literal, self.get_sign_from_bool(is_negation)) in [clause.variables[0] for clause in self.unary_clauses]:
             if self.verbose:
                 print("Contradictory unit clauses. Aborting.")
             return -1
@@ -106,8 +107,10 @@ class CNF:
         if assignment:
             satisfied_clauses, unsatisfied_clauses = literal.affirmations, literal.negations
         for clause_list in [satisfied_clauses, unsatisfied_clauses]:
-            if (not all([len(clause.variables)==clause.size for clause in clause_list])) or any([clause.removed for clause in clause_list]):
-                raise ValueError(f"Clauses:\t{[(clause.index, len(clause.variables), clause.size, clause.removed, (literal, self.get_sign_from_bool(assignment)) in clause.variables) for clause in clause_list]}")
+            if any([clause.removed for clause in clause_list]):
+                raise ValueError(f"Clauses:\t{[(str(clause), clause.removed, (literal, self.get_sign_from_bool(assignment)) in clause.variables) for clause in clause_list]}")
+            elif not all([len(clause.variables)==clause.size for clause in clause_list]):
+                raise ValueError(f"Clauses:\t{[(clause.index, len(clause.variables), clause.size) for clause in clause_list]}")
         if self.verbose:
             print(
                 f"Assigned literal {literal.index} so removing clauses {[str(clause) for clause in satisfied_clauses]}")
@@ -122,7 +125,7 @@ class CNF:
             self.remove_clause(clause)
         if self.verbose:
             print(
-                f"Assigned literal {literal.index} so reducing clauses {[clause.index for clause in unsatisfied_clauses]}")
+                f"Assigned literal {literal.index} so reducing clauses {[str(clause) for clause in unsatisfied_clauses]}")
         for clause in unsatisfied_clauses:
             if clause.removed:
                 raise ValueError(f"Clause has {clause} been removed.")
@@ -153,18 +156,23 @@ class CNF:
         self.num_clauses -= 1
 
     def propagate_units(self):
+        i = 0
         if len(self.unary_clauses) == 0:
             return 1
-        while len(self.unary_clauses) > 0:
+        if len(self.unary_clauses) > 0:
+            i += 1
             if self.verbose:
                 print(
                     f"Current unary clause list: {[str(clause) for clause in self.unary_clauses]}")
-            clause = self.unary_clauses[0]
+            clause = self.unary_clauses[-1]
             if not clause.removed:
                 literal, is_negation = clause.variables[0][0], clause.variables[0][1] < 0
-                success = self.assign_literal(literal, is_negation)
-                if success != 0:
-                    return -1
+                if not literal.removed:
+                    success = self.assign_literal(literal, is_negation)
+                    if success != 0:
+                        return -1
+                elif self.verbose:
+                    raise ValueError(f"Clause {clause} has not been removed already, but its literal {literal.index} has")
             elif self.verbose:
                 print(f"Clause {clause} has been removed already, skipping")
             self.unary_clauses.remove(clause)
@@ -176,9 +184,53 @@ class CNF:
         success = self.assign_literal(literal, is_negation)
         self.rearrange()
         if self.verbose:
-            print(f"Completed run of assignment of {integer}")
+            print(f"Completed run of assignment of {integer} with success {success}")
         print(f"Satisfiability: {self.solve()}")
         return success
+
+    def check_for_literal_clause_inconsistency(self):
+        literals_still_contain_clauses, clauses_still_contain_literals = 0, 0
+        unique_literals, unique_clauses = 0,0
+        clauses, literals = {}, {}
+        for literal in self.literals:
+            unique = True
+            for clause in literal.affirmations:
+                if (literal, 1) not in clause.variables:
+                    literals_still_contain_clauses += 1
+                    if unique:
+                        unique = False
+                        unique_literals += 1
+                    literals[str(literal.index)] = f"{literals.get(str(literal.index), str())} {str(clause)}\n"
+            for clause in literal.negations:
+                if (literal, -1) not in clause.variables:
+                    literals_still_contain_clauses += 1
+                    if unique:
+                        unique = False
+                        unique_literals += 1
+                    literals[str(literal.index)] = f"{literals.get(str(literal.index), str())} {str(clause)}\n"
+        for clause in self.clauses:
+            unique = True
+            for literal, sign in clause.variables:
+                if sign>0:
+                    if clause not in literal.affirmations:
+                        clauses_still_contain_literals += 1
+                        if unique:
+                            unique = False
+                            unique_clauses += 1
+                        clauses[str(clause.index)] = f"{clauses.get(str(clause.index), str())} {str(literal)}\n"
+                elif clause not in literal.negations:
+                    clauses_still_contain_literals += 1
+                    if unique:
+                        unique = False
+                        unique_clauses += 1
+                    clauses[str(clause.index)] = f"{clauses.get(str(clause.index), str())} {str(literal)}\n"
+        if literals_still_contain_clauses + clauses_still_contain_literals>0:
+            raise ValueError(f"Inconsistency with clause and literal lists.\n"
+                             f"{unique_clauses} unique clauses mention a total of {clauses_still_contain_literals} literals which don't mention them.\n"
+                             f"{[(clause, clauses[clause]) for clause in clauses.keys()]}\n"
+                             f"{unique_literals} unique literals mention a total of {literals_still_contain_clauses} clauses which don't contain them.\n"
+                             f"{literals}")
+
 
     def get_variable_from_integer(self, integer):
         literal_index, is_negation = abs(integer) - 1, integer < 0
@@ -191,7 +243,7 @@ class CNF:
         return literal, is_negation
 
     def rearrange(self):
-        if self.solved or self.num_literals == len(self.literals):
+        if self.solved or (self.num_literals == len(self.literals) and self.num_clauses == len(self.clauses)):
             return
         self.clauses = [clause for clause in self.clauses if not clause.removed and clause.size > 0]
         for literal in self.literals:
@@ -206,11 +258,16 @@ class CNF:
             literal.index = index + 1
         self.num_literals = len(self.literals)
         self.num_clauses = len(self.clauses)
-        if self.verbose:
-            print("Propagating from rearrange()")
         if self.num_clauses < 2 or self.num_literals < 2:
             self.solved = True
+            return
         self.unary_clauses = [clause for clause in self.clauses if clause.size == 1]
+        if self.literals[-1].index!=self.num_literals:
+            raise ValueError(f"Largest index {self.literals[-1].index} with {self.num_literals} literals counted.")
+            print(f"{len(self.literals)} Literals: {self.literals}")
+            raise e
+        if self.verbose:
+            print("Propagating from rearrange()")
         if self.propagate_units() == 0:
             return self.rearrange()
 
