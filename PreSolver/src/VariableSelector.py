@@ -6,7 +6,7 @@ VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", 
 
 class VariableSelector:
 
-    def __init__(self, cnf_string, cutoff=0.8, verbose=False, sep=" 0\n"):
+    def __init__(self, cnf_string, cutoff=0.5, verbose=False, sep=" 0\n"):
         self.cnf = CNF(cnf_string, sep=sep)
         self.cutoff = cutoff
         self.verbose = verbose

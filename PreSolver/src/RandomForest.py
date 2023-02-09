@@ -11,7 +11,7 @@ class SAT_RFC:
 
     def __init__(self, filename="..\\instances\\dataset.txt"):
         self.filename = filename
-        self.model = RandomForestClassifier(n_estimators=10, max_depth=8)
+        self.model = RandomForestClassifier(n_estimators=250, max_depth=8)
         self.data = pd.read_csv(self.filename, header=0).drop("filename", axis=1)
 
         # Split predictors and label
