@@ -18,6 +18,7 @@ class CNF:
         self.unary_clauses = []
         self.assignments = []
         self.construct(cnf_string, sep)
+        self.update_covariance_matrix()
         self.sat = self.solve()
         if self.verbose:
             print(f"Propagating from __init__() with unary clauses {[clause.index for clause in self.unary_clauses]}")
@@ -82,7 +83,7 @@ class CNF:
         return [[int(literal.index * sign) for literal, sign in clause.variables] for clause in self.clauses]
 
     def assign_literal(self, literal, is_negation):
-        self.check_for_literal_clause_inconsistency()
+        # self.check_for_literal_clause_inconsistency()
         if (literal, self.get_sign_from_bool(is_negation)) in [clause.variables[0] for clause in self.unary_clauses]:
             if self.verbose:
                 print("Contradictory unit clauses. Aborting.")
@@ -176,7 +177,7 @@ class CNF:
             elif self.verbose:
                 print(f"Clause {clause} has been removed already, skipping")
             self.unary_clauses.remove(clause)
-        self.check_for_sat_violation()
+        # self.check_for_sat_violation()
         return 0
 
     def assign_literal_by_integer(self, integer):
@@ -292,3 +293,26 @@ class CNF:
                     string += "error "
             string = string + "0\n"
         return string
+
+    def update_covariance_matrix(self):
+        self.covariance_matrix = [[0 for i in range(self.num_literals*2)] for j in range(self.num_literals*2)]
+        for clause in self.clauses:
+            for variable, assignment in clause.variables:
+                for other_variable, other_assignment in clause.variables:
+                    index, other_index = variable.index - 1, other_variable.index - 1
+                    if assignment==-1:
+                        index += self.num_literals
+                    if other_assignment == -1:
+                        other_index += self.num_literals
+                    try:
+                        self.covariance_matrix[index][other_index] += 1
+                        self.covariance_matrix[other_index][index] += 1
+                    except:
+                        raise ValueError(
+                            f"Covariance matrix size {len(self.covariance_matrix)} "
+                            f"with index {index} and other index {other_index}")
+        for literal in self.literals:
+            affirmation_index, negation_index = literal.index-1, literal.index-1+self.num_literals
+            literal.covariance_matrix_affirmation_row = self.covariance_matrix[affirmation_index]
+            literal.covariance_matrix_negation_row = self.covariance_matrix[negation_index]
+

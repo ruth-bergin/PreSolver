@@ -4,9 +4,32 @@ from VariableSelector import VariableSelector
 from DatasetPopulator import DatasetPopulator
 from os.path import isfile
 
+
+print("Reading file")
+filename = "../instances/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_0.cnf"
+file = open(filename, "r")
+cnf_string = file.read()
+file.close()
+
+
+cnf = CNF(cnf_string)
+cnf_string = str(cnf)
+print("Constructing selector.")
+selector = VariableSelector(cnf_string, verbose=True)
+
+selector.rfc.test_accuracy()
+
+print(f"Running selector.\nOriginal cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is {cnf.solve()}")
+exit_code, cnf = selector.run()
+
+print(f"Finished running with exit code {exit_code}.\nReduced cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is now {cnf.solve()}")
+
+
 """
-n = 300
-for i in range(n):
+
+
+n = 100
+for i in range(81, n):
     wd = "../instances/CBS_k3_n100_m403_b10/"
     info = ""
     print(f"On file {i}")
@@ -25,7 +48,6 @@ for i in range(n):
         file = open("../instances/main.txt", "a+")
         file.write(info)
         file.close()
-
 
 print("Function called")
 file = open("../instances/main.txt", "r")
@@ -61,28 +83,4 @@ except Exception as e:
     problem.close()
     print(f"{i} with value {txt[i]} and length {length}")
     raise e
-
 """
-
-file = open("../instances/dataset.txt", "r")
-print(len(file.readlines()))
-file.close()
-
-print("Reading file")
-filename = "../instances/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_0.cnf"
-file = open(filename, "r")
-cnf_string = file.read()
-file.close()
-
-
-cnf = CNF(cnf_string)
-cnf_string = str(cnf)
-print("Constructing selector.")
-selector = VariableSelector(cnf_string, verbose=True)
-
-selector.rfc.test_accuracy()
-
-print(f"Running selector.\nOriginal cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is {cnf.solve()}")
-exit_code, cnf = selector.run()
-
-print(f"Finished running with exit code {exit_code}.\nReduced cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is now {cnf.solve()}")

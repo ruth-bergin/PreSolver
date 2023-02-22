@@ -1,8 +1,9 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, RocCurveDisplay, roc_curve, auc
 from sklearn.ensemble import RandomForestClassifier
 from SATfeatPy.sat_instance.sat_instance import *
+import matplotlib.pyplot as plt
 
 TRAIN, TEST = "train", "test"
 INTERMEDIARY_FILENAME = "../instances/intermediary/shadow_cnf_features.txt"
@@ -25,9 +26,16 @@ class SAT_RFC:
         predicted = self.model.predict(self.x_test).tolist()
         actual = self.y_test.values.ravel()
 
+        fpr, tpr, thresholds = roc_curve(actual, predicted)
+        roc_auc = auc(fpr, tpr)
+
         accuracy = accuracy_score(predicted, actual)
         print(f"PREDICTED: {predicted}")
         print(f"ACCURACY: {accuracy}")
+
+        display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
+        display.plot()
+        plt.show()
 
     def predict_cnf(self, branch_true, branch_false):
         for cnf_string, assignment in [(branch_true, True), (branch_false, False)]:

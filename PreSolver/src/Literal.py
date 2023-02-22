@@ -1,9 +1,9 @@
 from random import randint
 import numpy as np
-import math
 
 CLAUSE_SUMMARY_STATS, CLAUSE_MIN_SIZE, CLAUSE_MAX_SIZE = "clause summary stats", "clause min size", "clause max size"
 CLAUSE_MEDIAN_SIZE, CLAUSE_MEAN_SIZE, CLAUSE_STD_SIZE = "clause median size", "clause mean size", "clause std size"
+COVARIANCE_MATRIX_STATISTIC = "covariance matrix statistic"
 
 class Literal:
 
@@ -15,23 +15,45 @@ class Literal:
         self.num_negations = 0
         self.affirmation_statistics = {}
         self.negation_statistics = {}
+        self.covariance_matrix_affirmation_row = []
+        self.covariance_matrix_negation_row = []
         self.removed = False
 
     def get_heuristic(self):
+        self.calculate_covariance_matrix_statistics()
+        if self.num_affirmations<1:
+            return self.num_negations*999999*self.affirmation_statistics[COVARIANCE_MATRIX_STATISTIC]
+        if self.num_negations<1:
+            return self.num_affirmations*999999*self.negation_statistics[COVARIANCE_MATRIX_STATISTIC]
         self.calculate_clause_summary_statistics()
-        affirmation_metric = self.num_affirmations/self.get_metric(True)
-        negation_metric = self.num_negations/self.get_metric(False)
+        affirmation_metric = self.num_affirmations*self.affirmation_statistics[COVARIANCE_MATRIX_STATISTIC]/self.get_clause_mean_size(True)
+        negation_metric = self.num_negations*self.affirmation_statistics[COVARIANCE_MATRIX_STATISTIC]/self.get_clause_mean_size(False)
         if affirmation_metric>negation_metric:
             return affirmation_metric/negation_metric
         else:
             return negation_metric/affirmation_metric
 
-    def get_metric(self, affirmation):
+    def get_clause_mean_size(self, affirmation):
         if affirmation:
             metrics = self.affirmation_statistics[CLAUSE_SUMMARY_STATS]
         else:
             metrics = self.negation_statistics[CLAUSE_SUMMARY_STATS]
         return metrics[CLAUSE_MEAN_SIZE]
+
+    def calculate_covariance_matrix_statistics(self):
+        nonzero_covariance_affirmation = list(filter(lambda x: (x > 0), self.covariance_matrix_affirmation_row))
+        if len(nonzero_covariance_affirmation) > 0:
+            self.affirmation_statistics[COVARIANCE_MATRIX_STATISTIC] = \
+                np.mean(nonzero_covariance_affirmation)
+        else:
+            self.affirmation_statistics[COVARIANCE_MATRIX_STATISTIC] = 0
+        nonzero_covariance_negation = list(filter(lambda x: (x > 0), self.covariance_matrix_negation_row))
+        if len(nonzero_covariance_negation) > 0:
+            self.negation_statistics[COVARIANCE_MATRIX_STATISTIC] = \
+                np.mean(nonzero_covariance_negation)
+        else:
+            self.negation_statistics[COVARIANCE_MATRIX_STATISTIC] = 0
+
 
     def calculate_clause_summary_statistics(self):
         self.affirmation_statistics[CLAUSE_SUMMARY_STATS], self.negation_statistics[CLAUSE_SUMMARY_STATS] = {}, {}

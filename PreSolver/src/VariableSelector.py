@@ -6,7 +6,7 @@ VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", 
 
 class VariableSelector:
 
-    def __init__(self, cnf_string, cutoff=0.5, verbose=False, sep=" 0\n"):
+    def __init__(self, cnf_string, cutoff=0.7, verbose=False, sep=" 0\n"):
         self.cnf = CNF(cnf_string, sep=sep)
         self.cutoff = cutoff
         self.verbose = verbose
@@ -61,6 +61,7 @@ class VariableSelector:
         return 2, self.cnf
 
     def branch_cnf(self):
+        self.cnf.update_covariance_matrix()
         next_variable = self.select_next_variable()
         if self.verbose:
             print("Branching CNF on {}".format(next_variable.index))
