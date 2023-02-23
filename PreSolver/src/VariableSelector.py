@@ -6,7 +6,7 @@ VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", 
 
 class VariableSelector:
 
-    def __init__(self, cnf_string, cutoff=0.7, verbose=False, sep=" 0\n"):
+    def __init__(self, cnf_string, cutoff=0.6, verbose=False, sep=" 0\n"):
         self.cnf = CNF(cnf_string, sep=sep)
         self.cutoff = cutoff
         self.verbose = verbose
@@ -35,7 +35,12 @@ class VariableSelector:
                 self.cnf = chosen_branch
             else:
                 first_pass = False
-            branches_sat_probability = self.branch_cnf()
+            try:
+                branches_sat_probability = self.branch_cnf()
+            except:
+                if self.verbose:
+                    print("Error with DPLL probing.")
+                return 1, self.cnf
             if self.solved:
                 if self.verbose:
                     print("Solved.")
@@ -43,7 +48,7 @@ class VariableSelector:
             elif branches_sat_probability[TRUE]==0 and branches_sat_probability[FALSE]==0:
                 if self.verbose:
                     print("Both branches unsat. Terminating.")
-                return 1, self.cnf
+                return 3, self.cnf
             elif branches_sat_probability[TRUE] > branches_sat_probability[FALSE]:
                 if self.verbose:
                     print("SAT probability of {} for True assignment is chosen instead of false value {}"

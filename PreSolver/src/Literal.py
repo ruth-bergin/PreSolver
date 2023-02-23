@@ -20,14 +20,13 @@ class Literal:
         self.removed = False
 
     def get_heuristic(self):
-        self.calculate_covariance_matrix_statistics()
         if self.num_affirmations<1:
-            return self.num_negations*999999*self.affirmation_statistics[COVARIANCE_MATRIX_STATISTIC]
+            return self.num_negations*999999
         if self.num_negations<1:
-            return self.num_affirmations*999999*self.negation_statistics[COVARIANCE_MATRIX_STATISTIC]
+            return self.num_affirmations*999999
         self.calculate_clause_summary_statistics()
-        affirmation_metric = self.num_affirmations*self.affirmation_statistics[COVARIANCE_MATRIX_STATISTIC]/self.get_clause_mean_size(True)
-        negation_metric = self.num_negations*self.affirmation_statistics[COVARIANCE_MATRIX_STATISTIC]/self.get_clause_mean_size(False)
+        affirmation_metric = self.num_affirmations/self.get_clause_mean_size(True)
+        negation_metric = self.num_negations/self.get_clause_mean_size(False)
         if affirmation_metric>negation_metric:
             return affirmation_metric/negation_metric
         else:
