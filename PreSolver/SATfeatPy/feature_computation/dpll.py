@@ -291,14 +291,7 @@ class DPLLProbing:
         num_vars_reduced = 1
 
         # can only set an unassigned variable to a value
-        try:
-            assert self.sat_instance.var_states[var] == VarState.UNASSIGNED
-        except:
-            if value:
-                assert self.sat_instance.var_states[var] == VarState.TRUE_VAL
-            else:
-                assert self.sat_instance.var_states[var] == VarState.FALSE_VAL
-            return True
+        assert self.sat_instance.var_states[var] == VarState.UNASSIGNED
 
 
         # set the value of the variable
@@ -424,13 +417,8 @@ class DPLLProbing:
 
             # while the current literal is not unassigned
             # get the next possible unassigned literal
-            loops = 0
-            try:
-                while (self.sat_instance.var_states[abs(self.sat_instance.clauses[clause_number][lit_num])] != VarState.UNASSIGNED):
-                    loops += 1
-                    lit_num += 1
-            except:
-                continue
+            while (self.sat_instance.var_states[abs(self.sat_instance.clauses[clause_number][lit_num])] != VarState.UNASSIGNED):
+                lit_num += 1
 
             assert self.sat_instance.clause_lengths[clause_number] == 1
 
