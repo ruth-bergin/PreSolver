@@ -270,7 +270,8 @@ class CNF:
         if self.verbose:
             print("Propagating from rearrange()")
         if self.propagate_units() == 0:
-            return self.rearrange()
+            raise ValueError("Unit propagation shouldn't have been necessary")
+             # return self.rearrange()
 
     def check_for_sat_violation(self):
         if not self.sat and self.solve():
@@ -278,6 +279,8 @@ class CNF:
 
     def __str__(self):
         self.rearrange()
+        if len(self.unary_clauses)>0:
+            raise ValueError("There shouldn't be unit clauses.")
         if self.solved:
             return ""
         string = "p cnf {} {}\n".format(self.num_literals, self.num_clauses)

@@ -6,7 +6,7 @@ from os.path import isfile
 
 
 print("Reading file")
-filename = "../instances/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_0.cnf"
+filename = "../instances/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_3.cnf"
 file = open(filename, "r")
 cnf_string = file.read()
 file.close()
