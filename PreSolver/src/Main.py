@@ -24,10 +24,10 @@ exit_code, cnf = selector.run()
 
 print(f"Finished running with exit code {exit_code}.\nReduced cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is now {cnf.solve()}")
 
-
 """
-n = 100
-for i in range(81, n):
+
+n = 30
+for i in range(2*n, 4*n):
     wd = "../instances/CBS_k3_n100_m403_b10/"
     info = ""
     print(f"On file {i}")
@@ -39,7 +39,7 @@ for i in range(81, n):
 
     cnf = CNF(cnf_string)
     populator = DatasetPopulator(fn[:-4], fn[:-4], cnf)
-    info += populator.populate(random=False)
+    info += populator.populate(random=i%3!=0)
 
     if info!="":
         print("Writing to main")
@@ -54,9 +54,10 @@ txt = [line.strip().split(",") for line in file.readlines()]
 file.close()
 
 i = 0
-init = False
-print("Entering for loop")
+init = True
 issues = 0
+print("Entering for loop")
+# Reached 520:824
 try:
     for filename, sat in txt[520:]:
         info = ""
@@ -69,9 +70,14 @@ try:
             try:
                 feats.gen_dpll_probing_features()
             except Exception as e:
-                raise e
                 print("Error.")
                 issues += 1
+                cnf = open(filename, "r")
+                cnf_string = file.read()
+                cnf.close()
+                fn = open(f"/instances/dpll/example_{issues}", "w+")
+                fn.write(cnf_string)
+                fn.close()
                 continue
 
             if init:
