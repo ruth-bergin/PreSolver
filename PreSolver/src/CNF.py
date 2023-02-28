@@ -159,6 +159,8 @@ class CNF:
     def propagate_units(self):
         i = 0
         if len(self.unary_clauses) == 0:
+            if self.verbose:
+                print("No unit clauses to propagate.")
             return 1
         if len(self.unary_clauses) > 0:
             i += 1
@@ -171,6 +173,8 @@ class CNF:
                 if not literal.removed:
                     success = self.assign_literal(literal, is_negation)
                     if success != 0:
+                        if self.verbose:
+                            print("Failed to assign unit clause. Aborting.")
                         return -1
                 elif self.verbose:
                     raise ValueError(f"Clause {clause} has not been removed already, but its literal {literal.index} has")
@@ -183,7 +187,9 @@ class CNF:
     def assign_literal_by_integer(self, integer):
         literal, is_negation = self.get_variable_from_integer(integer)
         success = self.assign_literal(literal, is_negation)
-        self.rearrange()
+        if success < 0:
+            return success
+        success = self.rearrange()
         if self.verbose:
             print(f"Completed run of assignment of {integer} with success {success}")
         print(f"Satisfiability: {self.solve()}")
@@ -245,7 +251,7 @@ class CNF:
 
     def rearrange(self):
         if self.solved or (self.num_literals == len(self.literals) and self.num_clauses == len(self.clauses)):
-            return
+            return 0
         self.clauses = [clause for clause in self.clauses if not clause.removed and clause.size > 0]
         for literal in self.literals:
             literal.affirmations = [clause for clause in literal.affirmations if not clause.removed]
@@ -261,17 +267,19 @@ class CNF:
         self.num_clauses = len(self.clauses)
         if self.num_clauses < 2 or self.num_literals < 2:
             self.solved = True
-            return
+            return 0
         self.unary_clauses = [clause for clause in self.clauses if clause.size == 1]
         if self.literals[-1].index!=self.num_literals:
             raise ValueError(f"Largest index {self.literals[-1].index} with {self.num_literals} literals counted.")
-            print(f"{len(self.literals)} Literals: {self.literals}")
-            raise e
         if self.verbose:
             print("Propagating from rearrange()")
-        if self.propagate_units() == 0:
-            raise ValueError("Unit propagation shouldn't have been necessary")
-             # return self.rearrange()
+        success = self.propagate_units()
+        if success == 0:
+            return self.rearrange()
+        elif success < 0:
+            return -1
+        return 0
+
 
     def check_for_sat_violation(self):
         if not self.sat and self.solve():
@@ -280,7 +288,7 @@ class CNF:
     def __str__(self):
         self.rearrange()
         if len(self.unary_clauses)>0:
-            raise ValueError("There shouldn't be unit clauses.")
+            raise ValueError(f"There shouldn't be unit clauses.\n{[str(clause) for clause in self.unary_clauses]}")
         if self.solved:
             return ""
         string = "p cnf {} {}\n".format(self.num_literals, self.num_clauses)
