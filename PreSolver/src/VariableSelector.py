@@ -10,6 +10,8 @@ class VariableSelector:
         self.cnf = CNF(cnf_string, sep=sep)
         self.cutoff = cutoff
         self.verbose = verbose
+        self.assignments = 0
+        self.assignments_to_failure = 0
         if self.verbose:
             print("Training RFC.")
         self.rfc = SAT_RFC()
@@ -33,9 +35,11 @@ class VariableSelector:
                     print("Sat probability of {} exceeds cutoff {}. Assigning variable"
                           .format(better_option_sat_probability, self.cutoff))
                 self.cnf = chosen_branch
+                self.assignments += 1
             else:
                 first_pass = False
-
+            if not self.cnf.solve() and self.assignments_to_failure == 0:
+                self.assignments_to_failure = self.assignments
             branches_sat_probability = self.branch_cnf()
             if self.solved:
                 if self.verbose:

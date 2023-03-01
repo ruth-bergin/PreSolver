@@ -13,47 +13,49 @@ time_taken = []
 solved = 0
 satisfiability_maintained = 0
 clause_size_reduced, variable_size_reduced = [], []
-try:
-    for fn in files[-10::]:
-        print("Reading file")
-        filename = path + fn
-        file = open(filename, "r")
-        cnf_string = file.read()
-        file.close()
+file = open("../instances/performance.txt", "w+")
+file.write("solved,sat,clause size,var size,time taken,assignments,assignments to failure")
+file.close()
+for fn in files[200:]:
+    print(f"Reading file {fn}")
+    filename = path + fn
+    file = open(filename, "r")
+    cnf_string = file.read()
+    file.close()
 
-        cnf = CNF(cnf_string)
-        cnf_string = str(cnf)
-        print("Constructing selector.")
-        selector = VariableSelector(cnf_string, verbose=True)
+    cnf = CNF(cnf_string)
+    cnf_string = str(cnf)
+    print("Constructing selector.")
+    selector = VariableSelector(cnf_string, verbose=True)
 
-        time1 = time()
+    time1 = time()
 
-        num_clauses, num_literals = cnf.num_clauses, cnf.num_literals
+    num_clauses, num_literals = cnf.num_clauses, cnf.num_literals
 
-        print(f"Running selector.\nOriginal cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is {cnf.solve()}")
-        exit_code, cnf = selector.run()
+    print(f"Running selector.\nOriginal cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is {cnf.solve()}")
+    exit_code, cnf = selector.run()
 
-        print(f"Finished running with exit code {exit_code}.\nReduced cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is now {cnf.solve()}")
+    print(f"Finished running with exit code {exit_code}.\nReduced cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is now {cnf.solve()}")
 
-        if cnf.solved:
-            solved += 1
-        if cnf.solve():
-            satisfiability_maintained += 1
-            clause_size_reduced.append(num_clauses-cnf.num_clauses)
-            variable_size_reduced.append(num_literals-cnf.num_literals)
+    if cnf.solved:
+        solved = True
+    if cnf.solve():
+        satisfiability_maintained = True
+    else:
+        solved = False
+        satisfiability_maintained = False
+    clause_size = cnf.num_clauses
+    variable_size = cnf.num_literals
+
+    time2 = time() - time1
+    print(f"Time taken: {time2}")
+
+    file = open("../instances/performance.txt", "a")
+    file.write(",".join([solved, satisfiability_maintained, clause_size, variable_size, time2, selector.assignments, selector.assignments_to_failure]) + "\n")
+    file.close()
 
 
-        time2 = time() - time1
-        print(f"Time taken: {time2}")
-        time_taken.append(time2)
-except Exception as e:
-    print(f"Time Taken\nMin:\t{min(time_taken)}\nMax:\t{max(time_taken)}\nMean:\t{mean(time_taken)}\n")
-    print(f"Proportion solved:\t{solved/41}\nAbsolute solved:\t{solved}\n")
-    print(f"Proportion satisfiable:\t{satisfiability_maintained/41}\nAbsolute satisfiable:\t{satisfiability_maintained}\n")
 
-    print(f"Clauses reduced\nMin:\t{min(clause_size_reduced)}\nMax:\t{max(clause_size_reduced)}\nMean:\t{mean(clause_size_reduced)}\n")
-    print(f"Literal reduced\nMin:\t{min(variable_size_reduced)}\nMax:\t{max(variable_size_reduced)}\nMean:\t{mean(variable_size_reduced)}\n")
-    raise e
 
 print(f"Time Taken\nMin:\t{min(time_taken)}\nMax:\t{max(time_taken)}\nMean:\t{mean(time_taken)}\n")
 print(f"Proportion solved:\t{solved/41}\nAbsolute solved:\t{solved}\n")
