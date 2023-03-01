@@ -35,12 +35,8 @@ class VariableSelector:
                 self.cnf = chosen_branch
             else:
                 first_pass = False
-            try:
-                branches_sat_probability = self.branch_cnf()
-            except:
-                if self.verbose:
-                    print("Error with DPLL probing.")
-                return 1, self.cnf
+
+            branches_sat_probability = self.branch_cnf()
             if self.solved:
                 if self.verbose:
                     print("Solved.")

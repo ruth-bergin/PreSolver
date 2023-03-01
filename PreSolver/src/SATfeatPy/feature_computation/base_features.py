@@ -29,17 +29,14 @@ def write_entropy_continous(l, name, features_dict):
     features_dict[name + "_entropy"] = entropy
 
 
-def compute_base_features(clauses, c, v, num_active_vars, num_active_clauses):
+def compute_base_features(clauses, c, v, num_active_vars=0, num_active_clauses=0):
     features_dict = {}
 
     # 1-3
-    features_dict["c"] = num_active_clauses
-    features_dict["v"] = num_active_vars
-    features_dict["clauses_vars_ratio"] = num_active_clauses / num_active_vars
-    features_dict["vars_clauses_ratio"] = num_active_vars / num_active_clauses
-
-    """c = num_active_clauses
-    v = num_active_vars"""
+    features_dict["c"] = c
+    features_dict["v"] = v
+    features_dict["clauses_vars_ratio"] = c / v
+    features_dict["vars_clauses_ratio"] = v / c
 
     # Variable Clause Graph features
     vcg_v_node_degrees, vcg_c_node_degrees = graph_features.create_vcg(clauses, c, v)

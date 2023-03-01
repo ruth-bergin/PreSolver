@@ -9,7 +9,6 @@ class CNF:
 
     def __init__(self, cnf_string, sep=" 0\n", verbose=False):
         self.solved = False
-        self.unary_unsat = False
         self.verbose = verbose
         self.num_clauses = 0
         self.num_literals = 0
@@ -83,7 +82,6 @@ class CNF:
         return [[int(literal.index * sign) for literal, sign in clause.variables] for clause in self.clauses]
 
     def assign_literal(self, literal, is_negation):
-        # self.check_for_literal_clause_inconsistency()
         if (literal, self.get_sign_from_bool(is_negation)) in [clause.variables[0] for clause in self.unary_clauses]:
             if self.verbose:
                 print("Contradictory unit clauses. Aborting.")
@@ -107,14 +105,11 @@ class CNF:
         satisfied_clauses, unsatisfied_clauses = literal.negations, literal.affirmations
         if assignment:
             satisfied_clauses, unsatisfied_clauses = literal.affirmations, literal.negations
-        for clause_list in [satisfied_clauses, unsatisfied_clauses]:
-            if any([clause.removed for clause in clause_list]):
-                raise ValueError(f"Clauses:\t{[(str(clause), clause.removed, (literal, self.get_sign_from_bool(assignment)) in clause.variables) for clause in clause_list]}")
-            elif not all([len(clause.variables)==clause.size for clause in clause_list]):
-                raise ValueError(f"Clauses:\t{[(clause.index, len(clause.variables), clause.size) for clause in clause_list]}")
         if self.verbose:
             print(
                 f"Assigned literal {literal.index} so removing clauses {[str(clause) for clause in satisfied_clauses]}")
+        if len(satisfied_clauses)==0 and self.verbose:
+            print(f"No clauses satisfied. Clauses unsatisfied: {[str(clause) for clause in unsatisfied_clauses]}")
         while len(satisfied_clauses)>0:
             clause = satisfied_clauses[-1]
             if clause.removed:
@@ -136,7 +131,6 @@ class CNF:
                     f"Previous clause: {self.clauses[clause.index - 1]}\n"
                     f"Next clause: {self.clauses[clause.index + 1]}")
             if clause in self.unary_clauses:
-                self.unary_unsat = True
                 return -1
             clause.remove_variable(self, literal, self.get_sign_from_bool(not assignment))
         return 0
@@ -181,11 +175,11 @@ class CNF:
             elif self.verbose:
                 print(f"Clause {clause} has been removed already, skipping")
             self.unary_clauses.remove(clause)
-        # self.check_for_sat_violation()
         return 0
 
     def assign_literal_by_integer(self, integer):
         literal, is_negation = self.get_variable_from_integer(integer)
+        num_clauses, num_literals = self.num_clauses, self.num_literals
         success = self.assign_literal(literal, is_negation)
         if success < 0:
             return success
@@ -193,6 +187,8 @@ class CNF:
         if self.verbose:
             print(f"Completed run of assignment of {integer} with success {success}")
         print(f"Satisfiability: {self.solve()}")
+        self.check_for_literal_clause_inconsistency()
+        self.check_for_sat_violation()
         return success
 
     def check_for_literal_clause_inconsistency(self):
@@ -287,7 +283,7 @@ class CNF:
 
     def __str__(self):
         self.rearrange()
-        if len(self.unary_clauses)>0:
+        if len(self.unary_clauses)>0 and not self.solved:
             raise ValueError(f"There shouldn't be unit clauses.\n{[str(clause) for clause in self.unary_clauses]}")
         if self.solved:
             return ""
