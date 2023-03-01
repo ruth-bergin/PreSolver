@@ -1,14 +1,11 @@
 # from SATfeatPy.sat_instance.sat_instance import SATInstance
-from CNF import CNF
+from src.SATInstance.CNF import CNF
 from VariableSelector import VariableSelector
 from time import time
 from os import listdir
-from numpy import mean
 
-
-path = r"../instances/CBS_k3_n100_m403_b10/"
+path = r"../instances/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_"
 i = 1
-files = listdir(path)
 time_taken = []
 solved = 0
 satisfiability_maintained = 0
@@ -16,9 +13,9 @@ clause_size_reduced, variable_size_reduced = [], []
 file = open("../instances/performance.txt", "w+")
 file.write("solved,sat,clause size,var size,time taken,assignments,assignments to failure")
 file.close()
-for fn in files[200:]:
-    print(f"Reading file {fn}")
-    filename = path + fn
+for i in range(200, 1000):
+    print(f"Reading file {i}")
+    filename = path + str(i) + ".cnf"
     file = open(filename, "r")
     cnf_string = file.read()
     file.close()
@@ -39,8 +36,10 @@ for fn in files[200:]:
 
     if cnf.solved:
         solved = True
-    if cnf.solve():
         satisfiability_maintained = True
+    elif cnf.solve():
+        satisfiability_maintained = True
+        solved = False
     else:
         solved = False
         satisfiability_maintained = False
@@ -51,18 +50,10 @@ for fn in files[200:]:
     print(f"Time taken: {time2}")
 
     file = open("../instances/performance.txt", "a")
-    file.write(",".join([solved, satisfiability_maintained, clause_size, variable_size, time2, selector.assignments, selector.assignments_to_failure]) + "\n")
+    file.write(",".join(
+        [str(i) for i in [solved, satisfiability_maintained, clause_size, variable_size, time2, selector.assignments, selector.assignments_to_failure]]) + "\n")
     file.close()
 
-
-
-
-print(f"Time Taken\nMin:\t{min(time_taken)}\nMax:\t{max(time_taken)}\nMean:\t{mean(time_taken)}\n")
-print(f"Proportion solved:\t{solved/41}\nAbsolute solved:\t{solved}\n")
-print(f"Proportion satisfiable:\t{satisfiability_maintained/41}\nAbsolute satisfiable:\t{satisfiability_maintained}\n")
-
-print(f"Clauses reduced\nMin:\t{min(clause_size_reduced)}\nMax:\t{max(clause_size_reduced)}\nMean:\t{mean(clause_size_reduced)}\n")
-print(f"Literal reduced\nMin:\t{min(variable_size_reduced)}\nMax:\t{max(variable_size_reduced)}\nMean:\t{mean(variable_size_reduced)}\n")
 
 """
 n = 30

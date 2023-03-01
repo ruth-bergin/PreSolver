@@ -2,7 +2,7 @@ from statistics import mean
 import os
 
 from VariableSelector import VariableSelector
-from src.CNF import CNF
+from src.SATInstance.CNF import CNF
 from time import time
 from SATfeatPy.sat_instance.sat_instance import *
 from random import shuffle, randint, choice

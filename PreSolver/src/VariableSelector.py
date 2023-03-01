@@ -1,4 +1,4 @@
-from src.CNF import CNF
+from src.SATInstance.CNF import CNF
 from RandomForest import SAT_RFC
 
 VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", "branch_t", "branch_f"
