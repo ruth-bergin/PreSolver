@@ -96,8 +96,7 @@ class SATInstance:
         if self.verbose:
             print("Generating basic features")
 
-        base_features_dict = base_features.compute_base_features(self.clauses, self.c, self.v, self.num_active_vars,
-                                                                 self.num_active_clauses)
+        base_features_dict = base_features.compute_base_features(self.clauses, self.c, self.v)
         self.features_dict.update(base_features_dict)
 
     def gen_dpll_probing_features(self):

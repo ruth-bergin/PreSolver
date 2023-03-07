@@ -261,7 +261,7 @@ class CNF:
             literal.index = index + 1
         self.num_literals = len(self.literals)
         self.num_clauses = len(self.clauses)
-        if self.num_clauses < 2 or self.num_literals < 2:
+        if self.num_clauses < 2:
             self.solved = True
             return 0
         self.unary_clauses = [clause for clause in self.clauses if clause.size == 1]

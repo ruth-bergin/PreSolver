@@ -6,7 +6,7 @@ VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", 
 
 class VariableSelector:
 
-    def __init__(self, cnf_string, cutoff=0.6, verbose=False, sep=" 0\n"):
+    def __init__(self, cnf_string, cutoff=0.6, verbose=False, sep=" 0\n", use_dpll=False):
         self.cnf = CNF(cnf_string, sep=sep)
         self.cutoff = cutoff
         self.verbose = verbose
@@ -14,12 +14,12 @@ class VariableSelector:
         self.assignments_to_failure = 0
         if self.verbose:
             print("Training RFC.")
-        self.rfc = SAT_RFC()
+        self.rfc = SAT_RFC(dpll_included=use_dpll)
         if self.verbose:
             print("Model training complete.")
         self.solved = False
 
-    def run(self):
+    def run(self, to_failure=False):
         better_option_sat_probability = self.cutoff + 0.1
         first_pass = True
         branches_sat_probability, chosen_branch = None, None
@@ -35,6 +35,9 @@ class VariableSelector:
                     print("Sat probability of {} exceeds cutoff {}. Assigning variable"
                           .format(better_option_sat_probability, self.cutoff))
                 self.cnf = chosen_branch
+                if to_failure:
+                    if not self.cnf.solve():
+                        return 0, self.cnf
                 self.assignments += 1
             else:
                 first_pass = False

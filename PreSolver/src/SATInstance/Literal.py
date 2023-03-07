@@ -20,10 +20,8 @@ class Literal:
         self.removed = False
 
     def get_heuristic(self):
-        if self.num_affirmations<1:
-            return self.num_negations*999999
-        if self.num_negations<1:
-            return self.num_affirmations*999999
+        if self.pure():
+            return self.appearances()
         self.calculate_clause_summary_statistics()
         affirmation_metric = self.num_affirmations/self.get_clause_mean_size(True)
         negation_metric = self.num_negations/self.get_clause_mean_size(False)
@@ -71,10 +69,24 @@ class Literal:
         clause_stats[CLAUSE_MEDIAN_SIZE] = np.median(clauses)
         clause_stats[CLAUSE_STD_SIZE] = np.std(clauses)
 
+    def pure(self):
+        if self.num_negations==0 or self.num_affirmations==0:
+            return True
+        return False
+
+    def appearances(self):
+        return self.num_negations + self.num_affirmations
+
     def __gt__(self, other):
+        if self.pure() and not other.pure():
+            return True
+        elif other.pure() and self.pure():
+            return self.num_affirmations+self.num_negations
         return self.get_heuristic() > other.get_heuristic()
 
     def __lt__(self, other):
+        if (not self.pure()) and other.pure():
+            return True
         return self.get_heuristic() < other.get_heuristic()
 
     def __str__(self):
