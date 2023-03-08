@@ -18,10 +18,13 @@ class CNF:
         self.assignments = []
         self.construct(cnf_string, sep)
         self.update_covariance_matrix()
+        self.update_covariance_matrix_statistics()
         self.sat = self.solve()
         if self.verbose:
             print(f"Propagating from __init__() with unary clauses {[clause.index for clause in self.unary_clauses]}")
         self.propagate_units()
+        for literal in self.literals:
+            literal.instance_num_clauses = self.num_clauses
 
     def construct(self, cnf_string, sep):
         if self.verbose:
@@ -189,6 +192,8 @@ class CNF:
         print(f"Satisfiability: {self.solve()}")
         self.check_for_literal_clause_inconsistency()
         self.check_for_sat_violation()
+        self.update_covariance_matrix()
+        self.update_covariance_matrix_statistics()
         return success
 
     def check_for_literal_clause_inconsistency(self):
@@ -274,8 +279,9 @@ class CNF:
             return self.rearrange()
         elif success < 0:
             return -1
+        for literal in self.literals:
+            literal.instance_num_clauses = self.num_clauses
         return 0
-
 
     def check_for_sat_violation(self):
         if not self.sat and self.solve():
@@ -318,8 +324,37 @@ class CNF:
                         raise ValueError(
                             f"Covariance matrix size {len(self.covariance_matrix)} "
                             f"with index {index} and other index {other_index}")
-        for literal in self.literals:
-            affirmation_index, negation_index = literal.index-1, literal.index-1+self.num_literals
-            literal.covariance_matrix_affirmation_row = self.covariance_matrix[affirmation_index]
-            literal.covariance_matrix_negation_row = self.covariance_matrix[negation_index]
 
+    def update_covariance_matrix_statistics(self):
+        for literal in self.literals:
+            literal.calculate_clause_summary_statistics()
+        count_value = [[1,0] for i in range(self.num_literals*2)]
+        metrics = []
+        i= 0
+        while i < self.num_literals*2:
+            j = 0
+            total_children = sum(self.covariance_matrix[i])
+            if total_children == 0:
+                metric = 0
+            elif i < self.num_literals:
+                metric = self.literals[i].get_metric(False)/self.literals[i].get_metric(True)
+                metric = metric/total_children
+            else:
+                metric = self.literals[i-self.num_literals].get_metric(True)/self.literals[i-self.num_literals].get_metric(False)
+                metric = metric/total_children
+            while j < self.num_literals*2:
+                count_value[j][0] += 1
+                count_value[j][1] += metric * self.covariance_matrix[i][j]
+                j += 1
+            metrics.append(metric)
+            i += 1
+        for i in range(self.num_literals):
+            if count_value[i][0]==0:
+                self.literals[i].covariance_matrix_statistics_true = 0
+            else:
+                self.literals[i].covariance_matrix_statistic_true = count_value[i][1]
+        for i in range(self.num_literals, 2*self.num_literals):
+            if count_value[i][0]==0:
+                self.literals[i-self.num_literals].covariance_matrix_statistic_false = 0
+            else:
+                self.literals[i-self.num_literals].covariance_matrix_statistic_false = count_value[i][1]

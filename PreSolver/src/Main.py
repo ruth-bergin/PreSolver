@@ -7,14 +7,14 @@ from DatasetPopulator import DatasetPopulator
 from os.path import isfile
 from RandomForest import RandomForestClassifier
 
-
+"""
 path = r"../instances/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_"
 i = 1
 time_taken = []
 solved = 0
 satisfiability_maintained = 0
 clause_size_reduced, variable_size_reduced = [], []
-for i in range(100, 150):
+for i in range(150, 200):
     print(f"Reading file {i}")
     filename = path + str(i) + ".cnf"
     file = open(filename, "r")
@@ -31,15 +31,15 @@ for i in range(100, 150):
     num_clauses, num_literals = cnf.num_clauses, cnf.num_literals
 
     print(f"Running selector.\nOriginal cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is {cnf.solve()}")
-    exit_code, cnf = selector.run(to_failure=True)
+    exit_code, cnf = selector.run(to_failure=False, single_path=True)
 
     print(f"Finished running with exit code {exit_code}.\nReduced cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is now {cnf.solve()}")
 
-    file = open("../instances/performance_no_cutoff.txt", "a+")
+    file = open("../instances/performance_with_purity.txt", "a+")
     file.write(",".join([str(i) for i in
-                         [selector.solved, num_literals-cnf.num_literals, num_clauses - cnf.num_clauses, selector.assignments]]) + "\n")
+                         [num_literals-cnf.num_literals, num_clauses - cnf.num_clauses, selector.assignments, selector.assignments_to_failure, selector.purity, selector.heuristic, cnf.solve()]]) + "\n")
 
-    """
+    
     if cnf.solved:
         solved = True
         satisfiability_maintained = True
@@ -60,9 +60,9 @@ for i in range(100, 150):
         [str(i) for i in [solved, satisfiability_maintained, clause_size, variable_size, time2, selector.assignments, selector.assignments_to_failure]]) + "\n")
     file.close()
 
-
+"""
 n = 30
-for i in range(30, 60):
+for i in range(60, 120):
     wd = "../instances/CBS_k3_n100_m403_b10/"
     info = ""
     print(f"On file {i}")
@@ -73,8 +73,8 @@ for i in range(30, 60):
     file.close()
 
     cnf = CNF(cnf_string)
-    populator = DatasetPopulator(fn[:-4], fn[:-4], cnf)
-    info += populator.populate(random=i%5!=0)
+    populator = DatasetPopulator(cnf, fn[:-4])
+    info += populator.populate(random=True)
 
     if info!="":
         print("Writing to main")
@@ -90,11 +90,11 @@ txt = [line.strip().split(",") for line in file.readlines()]
 file.close()
 
 i = 0
-init = True
+init = False
 issues = 0
 print("Entering for loop")
 try:
-    for filename, sat in txt[1:]:
+    for filename, sat in txt[2589:]:
         info = ""
         i+=1
         print(i, filename)
@@ -124,4 +124,4 @@ except Exception as e:
     raise e
 
 print(f"Number skipped due to issues with dpll probing: {issues}")
-"""
+
