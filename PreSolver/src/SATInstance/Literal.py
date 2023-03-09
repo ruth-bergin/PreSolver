@@ -37,8 +37,7 @@ class Literal:
                       f"Mean clause size aff: {self.get_clause_mean_size(True)}\nMean clause size neg: {self.get_clause_mean_size(False)}\n"
                       f"Cov metric aff: {self.covariance_matrix_statistic_true}\nCov metric neg: {self.covariance_matrix_statistic_false}")
             self.set_major_literal(True)
-            return randint(0,1000)/1000
-            # return affirmation_metric - negation_metric
+            return affirmation_metric - negation_metric
         else:
             if verbose:
                 print(f"False importance exceeds true importance.\nAff met: {affirmation_metric}\nNeg met: {negation_metric}\nCov met: {self.covariance_matrix_statistic_false}")
@@ -47,8 +46,7 @@ class Literal:
                       f"Mean clause size aff: {self.get_clause_mean_size(True)}\nMean clause size neg: {self.get_clause_mean_size(False)}\n"
                       f"Cov metric aff: {self.covariance_matrix_statistic_true}\nCov metric neg: {self.covariance_matrix_statistic_false}")
             self.set_major_literal(False)
-            return randint(0,1000)/1000
-            # return negation_metric - affirmation_metric
+            return negation_metric - affirmation_metric
 
     def get_strength_of_difference(self):
         if self.pure():
