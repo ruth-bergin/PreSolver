@@ -6,18 +6,27 @@ from os import listdir
 from DatasetPopulator import DatasetPopulator
 from os.path import isfile
 from RandomForest import RandomForestClassifier
+import sys
 
-"""
-path = r"../instances/cbs_k3_n100_m403_b10/"
-files = listdir(path)
-i = 1
+use_dpll = bool(sys.argv[1])
+single_path = bool(sys.argv[2])
+to_failure = bool(sys.argv[3])
+cutoff = float(sys.argv[4])
+
+output_file = f"../instances/performance/cbs_{use_dpll}_{single_path}_{to_failure}_{cutoff*100}.txt"
+
+
+path = r"../instances/cbs_k3_n100_m403_b10/CBS_k3_n100_m403_b10_"
 time_taken = []
 solved = 0
 satisfiability_maintained = 0
 clause_size_reduced, variable_size_reduced = [], []
-for i in files:
+fn = open(output_file, "w+")
+fn.write("literals reduced,clauses reduced,assignments,assignments to failure,sat,solved\n")
+fn.close()
+for i in range(300,350):
     print(f"Reading file {i}")
-    filename = path + str(i)
+    filename = path + str(i) + ".cnf"
     file = open(filename, "r")
     cnf_string = file.read()
     file.close()
@@ -25,22 +34,21 @@ for i in files:
     cnf = CNF(cnf_string)
 
     print("Constructing selector.")
-    selector = VariableSelector(cnf_string, verbose=True, cutoff=0.6, use_dpll=False)
-
-    # time1 = time()
+    selector = VariableSelector(cnf_string, verbose=True, cutoff=cutoff, use_dpll=use_dpll)
 
     num_clauses, num_literals = cnf.num_clauses, cnf.num_literals
 
     print(f"Running selector.\nOriginal cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is {cnf.solve()}")
-    exit_code, cnf = selector.run(to_failure=False, single_path=False)
+    exit_code, cnf = selector.run(to_failure=to_failure, single_path=single_path)
 
     print(f"Finished running with exit code {exit_code}.\nReduced cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is now {cnf.solve()}")
 
-    file = open("../instances/performance/rfc_cutoff60_ii.txt", "a+")
+    file = open(output_file, "a+")
     file.write(",".join([str(i) for i in
-                         [num_literals-cnf.num_literals, num_clauses - cnf.num_clauses, selector.assignments, selector.assignments_to_failure, cnf.solve()]]) + "\n")
+                         [num_literals-cnf.num_literals, num_clauses - cnf.num_clauses, selector.assignments, selector.assignments_to_failure, cnf.solve(), cnf.solved]]) + "\n")
+    file.close()
 
-
+"""
 
 n = 30
 for i in range(75):
@@ -63,7 +71,7 @@ for i in range(75):
         file.write(info)
         file.close()
 
-"""
+
 
 print("Function called")
 file = open("../instances/main_balanced.txt", "r")
@@ -106,4 +114,4 @@ except Exception as e:
     raise e
 
 print(f"Number skipped due to issues with dpll probing: {issues}")
-
+"""
