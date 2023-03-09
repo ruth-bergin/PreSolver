@@ -1,17 +1,20 @@
 from SATfeatPy.sat_instance.sat_instance import SATInstance
-from src.SATInstance.CNF import CNF
+from SATInstance.CNF import CNF
 from VariableSelector import VariableSelector
 from time import time
 from os import listdir
-from DatasetPopulator import DatasetPopulator
+# from DatasetPopulator import DatasetPopulator
 from os.path import isfile
-from RandomForest import RandomForestClassifier
+# from RandomForest import RandomForestClassifier
 import sys
 
 use_dpll = bool(sys.argv[1])
 single_path = bool(sys.argv[2])
 to_failure = bool(sys.argv[3])
 cutoff = float(sys.argv[4])
+
+if cutoff==0:
+    cutoff = int(cutoff)
 
 output_file = f"../instances/performance/cbs_{use_dpll}_{single_path}_{to_failure}_{cutoff*100}.txt"
 
