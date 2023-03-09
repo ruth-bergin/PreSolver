@@ -32,7 +32,11 @@ class CNF:
         text = [line.strip() for line in cnf_string[cnf_string.find("p cnf"):].split(sep)]
         line1, rest_of_text = text[0], text[1:]
         if "\n" in line1:
-            description, first_clause = [line.strip() for line in line1.split("\n")]
+            try:
+                description, first_clause = [line.strip() for line in line1.split("\n")]
+            except Exception as e:
+                print(line1.split("\n"))
+                raise e
             lines = [line for line in [first_clause] + rest_of_text if line != ""]
         else:
             description, lines = line1, rest_of_text

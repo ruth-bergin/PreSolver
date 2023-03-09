@@ -22,12 +22,10 @@ class DatasetPopulator:
         prev_cnf = None
         while (str(prev_cnf)!=str(self.cnf)):
             prev_cnf = self.cnf
-            print(f"On assignment {i}.")
             self.cnf.rearrange()
             variable = randint(1, self.cnf.num_literals)
             valid = []
             for j in [True, False]:
-                print(f"Solving for shadow branch {j} - num literals {self.cnf.num_literals}")
                 try:
                     name, shadow_cnf = self.write_and_solve_shadow_cnf(variable, self.convert_to_int(j))
                     if shadow_cnf.solved:
@@ -75,7 +73,6 @@ class DatasetPopulator:
         success = shadow_cnf.assign_literal_by_integer(variable*assignment)
         name = f"../instances/shadow/{self.i}_n{self.cnf.num_literals}_m{self.cnf.num_clauses}_{variable}{assignment}.txt"
         if success != 0:
-            print("~~~~~~Returning shadow CNF to original state.~~~~~~")
             shadow_cnf = CNF(str(self.cnf))
         elif not shadow_cnf.solved:
             fn = open(name, "w")

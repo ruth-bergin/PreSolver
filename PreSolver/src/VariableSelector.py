@@ -26,11 +26,12 @@ class VariableSelector:
         first_pass = True
         branches_sat_probability, chosen_branch = None, None
         i = 0
+        last_known_sat = str(self.cnf)
         if self.verbose:
             print("Running first pass")
-        while better_option_sat_probability > self.cutoff and not self.solved:
-            if self.purity < 0.5:
-                break
+        while better_option_sat_probability > self.cutoff:
+            if self.rfc.predict_sat(str(self.cnf)):
+                last_known_sat = str(self.cnf)
             i += 1
             if self.verbose:
                 print(f"CNF currently has {self.cnf.num_literals} literals and {self.cnf.num_clauses} clauses left.\n**ASSIGNMENT {i}**")
@@ -55,33 +56,17 @@ class VariableSelector:
             elif branches_sat_probability[TRUE]==0 and branches_sat_probability[FALSE]==0:
                 if self.verbose:
                     print("Both branches unsat. Terminating.")
-                return 3, self.cnf
+                return 3, CNF(last_known_sat)
             print(f"Strength of difference: {branches_sat_probability[VARIABLE].get_strength_of_difference()}")
             dominant_literal = branches_sat_probability[VARIABLE]
             self.heuristic = dominant_literal.get_heuristic()
             self.purity = dominant_literal.get_strength_of_difference()
             if not single_path:
                 true_prob = branches_sat_probability[TRUE] - branches_sat_probability[FALSE]
-                if dominant_literal and (true_prob>(-1*dominant_literal.get_strength_of_difference()) or branches_sat_probability[TRUE]>0.6):
-                    if self.verbose:
-                        print("SAT probability of {} for True assignment is chosen instead of false value {}, dominant"
-                              .format(branches_sat_probability[TRUE], branches_sat_probability[FALSE]))
-                    chosen_branch = branches_sat_probability[BRANCH_TRUE]
-                    better_option_sat_probability = branches_sat_probability[TRUE]
-                elif not dominant_literal and (true_prob<dominant_literal.get_strength_of_difference() or branches_sat_probability[FALSE]>0.6):
-                    if self.verbose:
-                        print("SAT probability of {} for False assignment is chosen instead of true value {}, dominant"
-                          .format(branches_sat_probability[FALSE], branches_sat_probability[TRUE]))
-                    chosen_branch = branches_sat_probability[BRANCH_FALSE]
-                    better_option_sat_probability = branches_sat_probability[FALSE]
-                elif true_prob>dominant_literal.get_strength_of_difference():
-                    if self.verbose:
-                        print(f"SAT probability of {branches_sat_probability[TRUE]} for true assignment is chosen instead of true value {branches_sat_probability[FALSE]} against dominance")
+                if true_prob>0:
                     chosen_branch = branches_sat_probability[BRANCH_TRUE]
                     better_option_sat_probability = branches_sat_probability[TRUE]
                 else:
-                    if self.verbose:
-                        print(f"SAT probability of {branches_sat_probability[FALSE]} for false assignment is chosen instead of true value {branches_sat_probability[TRUE]} against dominance")
                     chosen_branch = branches_sat_probability[BRANCH_FALSE]
                     better_option_sat_probability = branches_sat_probability[FALSE]
             elif (branches_sat_probability[VARIABLE].major_literal and branches_sat_probability[TRUE]>0) or branches_sat_probability[FALSE]==0:
@@ -96,7 +81,7 @@ class VariableSelector:
                 better_option_sat_probability = branches_sat_probability[FALSE]
         if self.verbose:
             print("Satisfiability of {} did not exceed cutoff of {}. Terminating.".format(better_option_sat_probability, self.cutoff))
-        return 2, self.cnf
+        return 2, CNF(last_known_sat)
 
     def branch_cnf(self):
         self.cnf.update_covariance_matrix()
@@ -141,7 +126,7 @@ class VariableSelector:
             return shadow_cnf
 
     def get_sat_probability(self, cnf_branch_true, cnf_branch_false):
-        return self.rfc.predict_cnf(cnf_branch_true, cnf_branch_false)
+        return self.rfc.predict_shadow_cnfs(cnf_branch_true, cnf_branch_false)
 
     def select_next_variable(self):
         return max(self.cnf.literals)
