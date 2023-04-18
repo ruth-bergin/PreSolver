@@ -8,7 +8,7 @@ from os.path import isfile
 # from RandomForest import RandomForestClassifier
 import sys
 
-use_dpll = sys.argv[1].lower() in ["t", "true"]
+"""use_dpll = sys.argv[1].lower() in ["t", "true"]
 single_path = sys.argv[2].lower() in ["t", "true"]
 to_failure = sys.argv[3].lower() in ["t", "true"]
 cutoff = float(sys.argv[4])
@@ -18,28 +18,29 @@ print(use_dpll, single_path, to_failure, cutoff)
 if cutoff==0:
     cutoff = int(cutoff)
 
-output_file = f"../instances/performance/cbs_{use_dpll}_{single_path}_{to_failure}_{int(cutoff*100)}.txt"
+output_file = f"../instances/performance/cbs_{use_dpll}_{single_path}_{to_failure}_{int(cutoff*100)}.txt"""""
 
-
-path = r"../instances/CBS_k3_n100_m403_b10/CBS_k3_n100_m403_b10_"
-time_taken = []
+path = r"../instances/dataset_final/"
+output_file = f"../instances/performance/dataset_final_True_False_True_50.txt"
+to_failure=True
+single_path=False
+use_dpll=True
+files = [file for file in listdir(path) if file[:3]=="sat"]
 solved = 0
 satisfiability_maintained = 0
 clause_size_reduced, variable_size_reduced = [], []
-fn = open(output_file, "w+")
-fn.write("literals reduced,clauses reduced,assignments,assignments to failure,sat,solved\n")
-fn.close()
-for i in range(300,350):
-    print(f"Reading file {i}")
-    filename = path + str(i) + ".cnf"
-    file = open(filename, "r")
+for i,file in enumerate(files[945:1020:15]):
+    print(f"Reading file {i} - {file}")
+    file = open(path+file, "r")
     cnf_string = file.read()
     file.close()
 
+    if cnf_string[:-2]!="\n":
+        cnf_string += "\n"
     cnf = CNF(cnf_string)
 
     print("Constructing selector.")
-    selector = VariableSelector(cnf_string, verbose=True, cutoff=cutoff, use_dpll=use_dpll)
+    selector = VariableSelector(cnf_string, verbose=True, cutoff=0, use_dpll=use_dpll)
 
     num_clauses, num_literals = cnf.num_clauses, cnf.num_literals
 
@@ -50,7 +51,7 @@ for i in range(300,350):
 
     file = open(output_file, "a+")
     file.write(",".join([str(i) for i in
-                         [num_literals-cnf.num_literals, num_clauses - cnf.num_clauses, selector.assignments, selector.assignments_to_failure, cnf.solve(), cnf.solved]]) + "\n")
+                         [num_literals, num_literals-cnf.num_literals, num_clauses - cnf.num_clauses, selector.assignments, selector.assignments_to_failure, cnf.solve(), cnf.solved]]) + "\n")
     file.close()
 
 """

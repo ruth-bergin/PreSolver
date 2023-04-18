@@ -20,6 +20,7 @@ class VariableSelector:
         self.solved = False
         self.purity = 1
         self.heuristic = 0
+        self.cutoff_curve = {}
 
     def run(self, to_failure=False, single_path=False):
         better_option_sat_probability = self.cutoff + 0.1
@@ -79,6 +80,11 @@ class VariableSelector:
                     print(f"True prob: {branches_sat_probability[TRUE]}\tFalse prob: {branches_sat_probability[FALSE]}")
                 chosen_branch = branches_sat_probability[BRANCH_FALSE]
                 better_option_sat_probability = branches_sat_probability[FALSE]
+            for k in range(10):
+                j = k/10
+                if better_option_sat_probability < j and str(j) not in self.cutoff_curve.keys():
+                    self.cutoff_curve[str(j)] = [str(self.cnf.solve()), str(self.assignments), False]
+
         if self.verbose:
             print("Satisfiability of {} did not exceed cutoff of {}. Terminating.".format(better_option_sat_probability, self.cutoff))
         return 2, CNF(last_known_sat)
