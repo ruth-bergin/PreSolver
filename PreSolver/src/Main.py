@@ -3,24 +3,13 @@ from SATInstance.CNF import CNF
 from VariableSelector import VariableSelector
 from time import time
 from os import listdir
-# from DatasetPopulator import DatasetPopulator
+from DatasetPopulator import DatasetPopulator
 from os.path import isfile
 # from RandomForest import RandomForestClassifier
 import sys
 
-"""use_dpll = sys.argv[1].lower() in ["t", "true"]
-single_path = sys.argv[2].lower() in ["t", "true"]
-to_failure = sys.argv[3].lower() in ["t", "true"]
-cutoff = float(sys.argv[4])
-
-print(use_dpll, single_path, to_failure, cutoff)
-
-if cutoff==0:
-    cutoff = int(cutoff)
-
-output_file = f"../instances/performance/cbs_{use_dpll}_{single_path}_{to_failure}_{int(cutoff*100)}.txt"""""
-
-path = r"../instances/dataset_final/"
+"""
+path = r"../instances/cbs/"
 output_file = f"../instances/performance/dataset_final_True_False_True_50.txt"
 to_failure=True
 single_path=False
@@ -120,4 +109,4 @@ except Exception as e:
     raise e
 
 print(f"Number skipped due to issues with dpll probing: {issues}")
-"""
+
