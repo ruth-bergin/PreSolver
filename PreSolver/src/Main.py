@@ -45,9 +45,8 @@ for i,file in enumerate(files[945:1020:15]):
 
 """
 
-n = 30
-for i in range(75):
-    wd = "../instances/CBS_k3_n100_m403_b10/"
+for i in range(100):
+    wd = "../instances/cbs/"
     info = ""
     print(f"On file {i}")
     print("Starting CNF {}".format(i))
@@ -58,18 +57,18 @@ for i in range(75):
 
     cnf = CNF(cnf_string)
     populator = DatasetPopulator(cnf, fn[:-4])
-    info += populator.populate(random=i%5!=0)
+    info += populator.populate(random=i%2==0)
 
     if info!="":
         print("Writing to main")
-        file = open("../instances/main_balanced.txt", "a+")
+        file = open("../instances/population/cbs_dpll.txt", "a+")
         file.write(info)
         file.close()
 
 
 
 print("Function called")
-file = open("../instances/main_balanced.txt", "r")
+file = open("../instances/population/cbs_dpll.txt", "r")
 txt = [line.strip().split(",") for line in file.readlines()]
 file.close()
 
@@ -91,14 +90,14 @@ try:
                 init = False
                 header = ",".join(feats.features_dict.keys())
                 info = f"filename,{header},sat\n"
-                file = open("../instances/rfc/dataset.txt", "w")
+                file = open("../instances/rfc/cbs_dpll.txt", "w")
                 file.write(info)
                 file.close()
                 info = ""
             info += filename + ","
             info += ",".join([str(feats.features_dict[key]) for key in feats.features_dict.keys()])
             info += "," + str(sat) + "\n"
-            file = open("../instances/rfc/dataset.txt", "a")
+            file = open("../instances/rfc/cbs_dpll.txt", "a")
             file.write(info)
             file.close()
 except Exception as e:
