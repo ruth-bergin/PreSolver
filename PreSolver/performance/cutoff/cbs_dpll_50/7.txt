@@ -1,0 +1,10 @@
+0.4,True,5,False
+0.5,True,5,False
+0.6,True,5,False
+0.7,True,5,False
+0.8,True,5,False
+0.9,True,5,False
+0.3,True,6,False
+0.0,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A5BCB80>>,22,True
+0.1,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A5BCB80>>,22,True
+0.2,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A5BCB80>>,22,True

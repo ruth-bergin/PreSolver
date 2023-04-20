@@ -46,7 +46,6 @@ class DatasetPopulator:
             if len(valid)<1:
                 raise ValueError(f"Neither is SAT. Problem. {self.cnf.solve()}")
             assignment = choice(valid)
-            print(f"Assigning value {assignment[1]} to {variable}.")
             self.cnf = assignment[0]
             i += 1
         if str(self.cnf)==str(prev_cnf):

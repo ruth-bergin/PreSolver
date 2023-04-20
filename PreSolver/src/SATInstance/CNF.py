@@ -193,7 +193,7 @@ class CNF:
         success = self.rearrange()
         if self.verbose:
             print(f"Completed run of assignment of {integer} with success {success}")
-        print(f"Satisfiability: {self.solve()}")
+            print(f"Satisfiability: {self.solve()}")
         self.check_for_literal_clause_inconsistency()
         self.check_for_sat_violation()
         self.update_covariance_matrix()

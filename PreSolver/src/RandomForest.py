@@ -10,16 +10,11 @@ INTERMEDIARY_FILENAME = "../instances/intermediary/shadow_cnf_features.txt"
 
 class SAT_RFC:
 
-    def __init__(self, dpll_included = False, balanced = True):
-        self.filename = "..\\instances\\rfc\\dataset"
-        if not balanced:
-            self.filename += "_skewed"
-        if not dpll_included:
-            self.filename += "_no_dpll"
-        self.filename += ".txt"
-        self.dpll_included = dpll_included
+    def __init__(self, dataset="cbs_dpll_50.txt", dpll=True):
+        self.filename = "..\\instances\\rfc\\" + dataset
         self.model = RandomForestClassifier(n_estimators=250, max_depth=8)
         self.data = pd.read_csv(self.filename, header=0).drop("filename", axis=1)
+        self.dpll=dpll
 
         # Split predictors and label
         predictors, label = self.data.loc[:, self.data.columns[:-1]],self.data.loc[:, self.data.columns[-1:]]
@@ -75,7 +70,7 @@ class SAT_RFC:
             info += "\n"
             feats = SATInstance(filename, preprocess=False)
             feats.gen_basic_features()
-            if self.dpll_included:
+            if self.dpll:
                 feats.gen_dpll_probing_features()
             info += ",".join([str(feats.features_dict[key]) for key in feats.features_dict.keys()])
 
