@@ -1,5 +1,6 @@
 from src.SATInstance.CNF import CNF
 from RandomForest import SAT_RFC
+from random import choice
 
 VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", "branch_t", "branch_f"
 
@@ -24,6 +25,7 @@ class VariableSelector:
         self.heuristic = 0
         self.cutoff_curve = {}
         self.dataset=dataset
+        self.lowest_reached = 1
 
     def run(self, to_failure=False, single_path=False, instance=0):
         better_option_sat_probability = self.cutoff + 0.1
@@ -46,6 +48,10 @@ class VariableSelector:
                 fn = open(f"../instances/performance/{self.dataset[:-4]}_instances/ten/{instance}.txt", "w+")
                 fn.write(str(self.cnf))
                 fn.close()
+            elif self.assignments==20:
+                fn = open(f"../instances/performance/{self.dataset[:-4]}_instances/twenty/{instance}.txt", "w+")
+                fn.write(str(self.cnf))
+                fn.close()
             if self.rfc.predict_sat(str(self.cnf)):
                 last_known_sat = str(self.cnf)
             i += 1
@@ -56,6 +62,8 @@ class VariableSelector:
                     print("Sat probability of {} exceeds cutoff {}. Assigning variable"
                           .format(better_option_sat_probability, self.cutoff))
                 self.cnf = chosen_branch
+                if self.lowest_reached>better_option_sat_probability:
+                    self.lowest_reached=better_option_sat_probability
                 if to_failure:
                     if not self.cnf.solve():
                         return 0, self.cnf
@@ -68,6 +76,10 @@ class VariableSelector:
             if self.solved:
                 if self.verbose:
                     print("Solved.")
+                for k in range(10):
+                    j = k/10
+                    if self.lowest_reached>j:
+                        self.cutoff_curve[str(j)] = [str(self.cnf.num_literals), "solved"]
                 return 0, self.cnf
             elif branches_sat_probability[TRUE]==0 and branches_sat_probability[FALSE]==0:
                 if self.verbose:
@@ -98,8 +110,8 @@ class VariableSelector:
                 better_option_sat_probability = branches_sat_probability[FALSE]
             for k in range(10):
                 j = k/10
-                if better_option_sat_probability < j and str(j) not in self.cutoff_curve.keys():
-                    self.cutoff_curve[str(j)] = [str(self.cnf.solve()), str(self.assignments), str(False)]
+                if self.lowest_reached>j:
+                    self.cutoff_curve[str(j)] = [str(self.cnf.num_literals), str(self.cnf.solve())]
 
         if self.verbose:
             print("Satisfiability of {} did not exceed cutoff of {}. Terminating.".format(better_option_sat_probability, self.cutoff))
@@ -153,6 +165,8 @@ class VariableSelector:
     def select_next_variable(self):
         if self.selection_complexity=="complete":
             return max(self.cnf.literals)
+        elif self.selection_complexity=="random":
+            return choice(self.cnf.literals)
         elif self.selection_complexity=="appearances":
             for literal in self.cnf.literals:
                 if literal.pure():

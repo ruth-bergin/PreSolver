@@ -66,7 +66,7 @@ class DatasetPopulator:
     def write_and_solve_shadow_cnf(self, variable, assignment):
         if variable>self.cnf.num_literals:
             raise IndexError("Num literals changed since function call.")
-        shadow_cnf = CNF(str(self.cnf))
+        shadow_cnf = CNF(str(self.cnf),verbose=True)
         if variable>shadow_cnf.num_literals:
             raise IndexError(f"Num literals changed since shadow cnf formation. Variable {variable} num lit {shadow_cnf.num_literals}")
         success = shadow_cnf.assign_literal_by_integer(variable*assignment)

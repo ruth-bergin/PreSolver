@@ -1,0 +1,10 @@
+0.0,0,solved
+0.1,0,solved
+0.2,19,True
+0.3,23,True
+0.4,27,True
+0.5,27,True
+0.6,29,True
+0.7,30,True
+0.8,30,True
+0.9,30,True

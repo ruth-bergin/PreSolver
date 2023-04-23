@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from SATfeatPy.sat_instance.sat_instance import SATInstance
 from SATInstance.CNF import CNF
 from VariableSelector import VariableSelector
@@ -7,25 +10,34 @@ from DatasetPopulator import DatasetPopulator
 from os.path import isfile
 # from RandomForest import RandomForestClassifier
 import sys
+from random import sample
+from pysat.solvers import Solver
 
 def experiment(dataset, category, save_instances=False, heuristic="complete"):
-    path = r"../instances/cbs/"
+    path = r"../instances/verification/sat/"
     output_file = f"../performance/{category}/{dataset}.txt"
     if category=="heuristic":
         output_file = f"../performance/{category}/{heuristic}.txt"
-    files = listdir(path)[300:350]
-    for i,file in enumerate(files):
+    files = listdir(path)
+    failures_to_read = 0
+    for j,file in enumerate(files[31:]):
+        i = j + 31
         print(f"Reading file {i} - {file}")
         file = open(path+file, "r")
         cnf_string = file.read()
         file.close()
 
-        #if cnf_string[:-2]!="\n":
-        #    cnf_string += "\n"
-        cnf = CNF(cnf_string)
+        if cnf_string[:-2]!="\n":
+            cnf_string += "\n"
+        try:
+            cnf = CNF(cnf_string)
+        except:
+            failures_to_read += 1
+            print("***FAILURES TO READ***",failures_to_read)
+            continue
 
         print("Constructing selector.")
-        selector = VariableSelector(cnf_string, verbose=False, cutoff=0, use_dpll=True,
+        selector = VariableSelector(cnf_string, verbose=False, cutoff=0.5, use_dpll=True,
                                     selection_complexity=heuristic, dataset=dataset+".txt")
 
         num_clauses, num_literals = cnf.num_clauses, cnf.num_literals
@@ -45,29 +57,35 @@ def experiment(dataset, category, save_instances=False, heuristic="complete"):
             fn.write(str(cnf))
             fn.close()
 
-        for k in range(10):
-            j = k/10
-            if str(j) not in selector.cutoff_curve.keys():
-                selector.cutoff_curve[str(j)] = [str(cnf.solve), str(selector.assignments), str(cnf.solved)]
+experiment("dataset_final","heuristic", heuristic="random")
 
-        fn = open(f"../performance/cutoff/{dataset}/{i}.txt","w+")
-        fn.write("\n".join([",".join([key]+selector.cutoff_curve[key]) for key in selector.cutoff_curve.keys()]))
-        fn.close()
+"""file = open("../instances/population/cbs_supplementary.txt","r")
+instances = [line.strip("\n").split(",") for line in file.readlines()]
+file.close()
 
-experiment("cbs_dpll_50", "cutoff",False)
+refined = ""
+i = 0
+for filename, sat in instances:
+    if sat=="False":
+        refined += f"{filename},{sat}\n"
+        i += 1
+    if i==300:
+        break
+
+file = open("../instances/population/dataset_final_refined.txt","a+")
+file.write(refined)
+file.close()
 
 
-"""
+path = "../instances/dataset_final/"
+indices = indices[101:]
+files = [os.listdir(path)[index] for index in indices]
 
-
-for i in range(150,200):
-    wd = "../instances/cbs/"
-    info = ""
-    print(f"On file {i}")
-    print("Starting CNF {}".format(i))
-    fn = "CBS_k3_n100_m403_b10_{}.cnf".format(i)
-    file = open(wd+fn, "r")
-    cnf_string = file.read()
+for index,fn in enumerate(files[15+18+13:]):
+    print(index)
+    info=""
+    file = open(path+fn, "r")
+    cnf_string = file.read() + "\n"
     file.close()
 
     cnf = CNF(cnf_string)
@@ -76,15 +94,14 @@ for i in range(150,200):
 
     if info!="":
         print("Writing to main")
-        file = open("../instances/population/cbs_supplementary1.txt", "a+")
+        file = open("../instances/population/dataset_final_supplementary.txt", "a+")
         file.write(info)
         file.close()
 
 
 
-
 print("Function called")
-file = open("../instances/population/cbs_supplementary.txt", "r")
+file = open("../instances/population/dataset_final_refined.txt", "r")
 txt = [line.strip().split(",") for line in file.readlines()]
 file.close()
 
@@ -92,29 +109,28 @@ i = 0
 init = False
 issues = 0
 print("Entering for loop")
-for filename, sat in txt:
+for filename, sat in txt[2030:]:
     info = ""
-    if sat=="False":
-        i+=1
-    else:
-        continue
     print(i, filename)
+    i+=1
     if isfile(filename):
         feats = SATInstance(filename, preprocess=False)
         feats.gen_basic_features()
+        feats.gen_dpll_probing_features()
 
         if init:
             init = False
             header = ",".join(feats.features_dict.keys())
             info = f"filename,{header},sat\n"
-            file = open("../instances/rfc/cbs_base_complete.txt", "w")
+            file = open("../instances/rfc/dataset_final.txt", "w")
             file.write(info)
             file.close()
             info = ""
         info += filename + ","
         info += ",".join([str(feats.features_dict[key]) for key in feats.features_dict.keys()])
         info += "," + str(sat) + "\n"
-        file = open("../instances/rfc/cbs_base_complete.txt", "a")
+        file = open("../instances/rfc/dataset_final.txt", "a")
         file.write(info)
         file.close()
 """
+

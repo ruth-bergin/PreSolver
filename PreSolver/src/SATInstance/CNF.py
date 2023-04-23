@@ -294,7 +294,7 @@ class CNF:
     def __str__(self):
         self.rearrange()
         if len(self.unary_clauses)>0 and not self.solved:
-            raise ValueError(f"There shouldn't be unit clauses.\n{[str(clause) for clause in self.unary_clauses]}")
+            print(f"There shouldn't be unit clauses.\n{[str(clause) for clause in self.unary_clauses]}")
         if self.solved:
             return ""
         string = "p cnf {} {}\n".format(self.num_literals, self.num_clauses)

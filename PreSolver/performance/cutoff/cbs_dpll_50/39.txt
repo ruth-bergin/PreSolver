@@ -1,10 +1,10 @@
-0.9,True,3,False
-0.8,True,5,False
-0.0,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A7ABA90>>,44,True
-0.1,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A7ABA90>>,44,True
-0.2,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A7ABA90>>,44,True
-0.3,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A7ABA90>>,44,True
-0.4,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A7ABA90>>,44,True
-0.5,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A7ABA90>>,44,True
-0.6,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A7ABA90>>,44,True
-0.7,<bound method CNF.solve of <src.SATInstance.CNF.CNF object at 0x0000024D7A7ABA90>>,44,True
+0.0,2,solved
+0.1,2,solved
+0.2,2,solved
+0.3,2,solved
+0.4,2,solved
+0.5,2,solved
+0.6,2,solved
+0.7,2,solved
+0.8,2,solved
+0.9,98,True
