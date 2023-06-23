@@ -21,13 +21,11 @@ class VariableSelector:
         if self.verbose:
             print("Model training complete.")
         self.solved = False
-        self.purity = 1
-        self.heuristic = 0
         self.cutoff_curve = {}
         self.dataset=dataset
         self.lowest_reached = 1
 
-    def run(self, to_failure=False, single_path=False, instance=0):
+    def run(self, to_failure=False):
         better_option_sat_probability = self.cutoff + 0.1
         first_pass = True
         branches_sat_probability, chosen_branch = None, None
@@ -36,22 +34,6 @@ class VariableSelector:
         if self.verbose:
             print("Running first pass")
         while better_option_sat_probability > self.cutoff:
-            if self.assignments==3:
-                fn = open(f"../instances/performance/{self.dataset[:-4]}_instances/three/{instance}.txt", "w+")
-                fn.write(str(self.cnf))
-                fn.close()
-            elif self.assignments==5:
-                fn = open(f"../instances/performance/{self.dataset[:-4]}_instances/five/{instance}.txt", "w+")
-                fn.write(str(self.cnf))
-                fn.close()
-            elif self.assignments==10:
-                fn = open(f"../instances/performance/{self.dataset[:-4]}_instances/ten/{instance}.txt", "w+")
-                fn.write(str(self.cnf))
-                fn.close()
-            elif self.assignments==20:
-                fn = open(f"../instances/performance/{self.dataset[:-4]}_instances/twenty/{instance}.txt", "w+")
-                fn.write(str(self.cnf))
-                fn.close()
             if self.rfc.predict_sat(str(self.cnf)):
                 last_known_sat = str(self.cnf)
             i += 1
@@ -85,27 +67,10 @@ class VariableSelector:
                 if self.verbose:
                     print("Both branches unsat. Terminating.")
                 return 3, CNF(last_known_sat)
-            if self.verbose:
-                print(f"Strength of difference: {branches_sat_probability[VARIABLE].get_strength_of_difference()}")
-            dominant_literal = branches_sat_probability[VARIABLE]
-            self.heuristic = dominant_literal.get_heuristic()
-            self.purity = dominant_literal.get_strength_of_difference()
-            if not single_path:
-                true_prob = branches_sat_probability[TRUE] - branches_sat_probability[FALSE]
-                if true_prob>0:
-                    chosen_branch = branches_sat_probability[BRANCH_TRUE]
-                    better_option_sat_probability = branches_sat_probability[TRUE]
-                else:
-                    chosen_branch = branches_sat_probability[BRANCH_FALSE]
-                    better_option_sat_probability = branches_sat_probability[FALSE]
-            elif (branches_sat_probability[VARIABLE].major_literal and branches_sat_probability[TRUE]>0) or branches_sat_probability[FALSE]==0:
-                if self.verbose:
-                    print(f"True prob: {branches_sat_probability[TRUE]}\tFalse prob: {branches_sat_probability[FALSE]}")
+            if branches_sat_probability[TRUE] - branches_sat_probability[FALSE]>0:
                 chosen_branch = branches_sat_probability[BRANCH_TRUE]
                 better_option_sat_probability = branches_sat_probability[TRUE]
             else:
-                if self.verbose:
-                    print(f"True prob: {branches_sat_probability[TRUE]}\tFalse prob: {branches_sat_probability[FALSE]}")
                 chosen_branch = branches_sat_probability[BRANCH_FALSE]
                 better_option_sat_probability = branches_sat_probability[FALSE]
             for k in range(10):
