@@ -14,14 +14,14 @@ from random import sample
 from pysat.solvers import Solver
 
 def experiment(dataset, category, save_instances=False, heuristic="complete"):
-    path = r"../instances/verification/sat/"
+    path = r"../instances/cbs/"
     output_file = f"../performance/{category}/{dataset}.txt"
     if category=="heuristic":
         output_file = f"../performance/{category}/{heuristic}.txt"
     files = listdir(path)
     failures_to_read = 0
-    for j,file in enumerate(files[31:]):
-        i = j + 31
+    for j,file in enumerate(files[23+19:50]):
+        i = j + 23+19
         print(f"Reading file {i} - {file}")
         file = open(path+file, "r")
         cnf_string = file.read()
@@ -37,13 +37,13 @@ def experiment(dataset, category, save_instances=False, heuristic="complete"):
             continue
 
         print("Constructing selector.")
-        selector = VariableSelector(cnf_string, verbose=False, cutoff=0.5, use_dpll=True,
+        selector = VariableSelector(cnf_string, verbose=False, cutoff=0, use_dpll=False,
                                     selection_complexity=heuristic, dataset=dataset+".txt")
 
         num_clauses, num_literals = cnf.num_clauses, cnf.num_literals
 
         print(f"Running selector.\nOriginal cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is {cnf.solve()}")
-        exit_code, cnf = selector.run(to_failure=False, instance=i)
+        exit_code, cnf = selector.run(to_failure=True, instance=i, single_path=True)
 
         print(f"Finished running with exit code {exit_code}.\nReduced cnf has {cnf.num_clauses} clauses and {cnf.num_literals} variables.\nInstance sat is now {cnf.solve()}")
 
@@ -57,7 +57,7 @@ def experiment(dataset, category, save_instances=False, heuristic="complete"):
             fn.write(str(cnf))
             fn.close()
 
-experiment("dataset_final","heuristic", heuristic="random")
+experiment("cbs_base_50","verification", heuristic="complete")
 
 """file = open("../instances/population/cbs_supplementary.txt","r")
 instances = [line.strip("\n").split(",") for line in file.readlines()]
