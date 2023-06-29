@@ -20,9 +20,7 @@ class VariableSelector:
         if self.verbose:
             print("Model training complete.")
         self.solved = False
-        self.cutoff_curve = {}
         self.dataset=dataset
-        self.lowest_reached = 1
 
     def run(self, to_failure=False):
         better_option_sat_probability = self.cutoff + 0.1
@@ -37,7 +35,8 @@ class VariableSelector:
                 last_known_sat = str(self.cnf)
             i += 1
             if self.verbose:
-                print(f"CNF currently has {self.cnf.num_literals} literals and {self.cnf.num_clauses} clauses left.\n**ASSIGNMENT {i}**")
+                print(f"CNF currently has {self.cnf.num_literals} literals "
+                      f"and {self.cnf.num_clauses} clauses left.\n**ASSIGNMENT {i}**")
             if not first_pass:
                 if self.verbose:
                     print("Sat probability of {} exceeds cutoff {}. Assigning variable"
@@ -57,10 +56,6 @@ class VariableSelector:
             if self.solved:
                 if self.verbose:
                     print("Solved.")
-                for k in range(10):
-                    j = k/10
-                    if self.lowest_reached>j:
-                        self.cutoff_curve[str(j)] = [str(self.cnf.num_literals), "solved"]
                 return 0, self.cnf
             elif branches_sat_probability[TRUE]==0 and branches_sat_probability[FALSE]==0:
                 if self.verbose:
@@ -72,13 +67,10 @@ class VariableSelector:
             else:
                 chosen_branch = branches_sat_probability[BRANCH_FALSE]
                 better_option_sat_probability = branches_sat_probability[FALSE]
-            for k in range(10):
-                j = k/10
-                if self.lowest_reached>j:
-                    self.cutoff_curve[str(j)] = [str(self.cnf.num_literals), str(self.cnf.solve())]
 
         if self.verbose:
-            print("Satisfiability of {} did not exceed cutoff of {}. Terminating.".format(better_option_sat_probability, self.cutoff))
+            print("Satisfiability of {} did not exceed cutoff of {}. "
+                  "Terminating.".format(better_option_sat_probability, self.cutoff))
         return 2, CNF(last_known_sat)
 
     def branch_cnf(self):
