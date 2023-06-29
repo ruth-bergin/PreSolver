@@ -1,9 +1,8 @@
 from src.SATInstance.CNF import CNF
-from RandomForest import SAT_RFC
+from src.ml.RandomForest import SAT_RFC
 from random import choice
 
 VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", "branch_t", "branch_f"
-
 
 class VariableSelector:
 
