@@ -27,7 +27,7 @@ class Solution:
         self.cnf = [[literal]] + self.cnf
 
         if self.save_to_file:
-            filename = f"{self.filename[:-4]}_frequency_p{len(self.assignments)}_x{literal}.cnf"
+            filename = f"{self.filename[:-4]}_freqClause_p{len(self.assignments)}_x{literal}.cnf"
             file = open(filename, "w+")
             file.write(str(self))
             file.close()

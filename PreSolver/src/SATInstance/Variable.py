@@ -27,8 +27,8 @@ class Variable:
                 print(f"Pure literal {self.major_literal}, returning number of appearances")
             return self.appearances()
         self.calculate_clause_summary_statistics()
-        affirmation_metric = self.get_metric(True)*self.covariance_matrix_statistic_true
-        negation_metric = self.get_metric(False)*self.covariance_matrix_statistic_false
+        affirmation_metric = self.get_metric(True) #*self.covariance_matrix_statistic_true
+        negation_metric = self.get_metric(False) #*self.covariance_matrix_statistic_false
         if affirmation_metric>negation_metric:
             self.set_major_literal(True)
             return affirmation_metric - negation_metric
