@@ -27,33 +27,14 @@ class Literal:
                 print(f"Pure literal {self.major_literal}, returning number of appearances")
             return self.appearances()
         self.calculate_clause_summary_statistics()
-        affirmation_metric = self.get_metric(True)/np.sqrt(self.covariance_matrix_statistic_false)
-        negation_metric = self.get_metric(False)/np.sqrt(self.covariance_matrix_statistic_true)
+        affirmation_metric = self.get_metric(True)*self.covariance_matrix_statistic_true
+        negation_metric = self.get_metric(False)*self.covariance_matrix_statistic_false
         if affirmation_metric>negation_metric:
-            if verbose:
-                print(f"True importance exceeds false importance.\nAff met: {affirmation_metric}\nNeg met: {negation_metric}\nCov met: {self.covariance_matrix_statistic_true}")
-                print(f"Num aff: {self.num_affirmations}\nNum neg: {self.num_negations}\n"
-                      f"Min clause size aff: {self.get_clause_min_size(True)}\nMin clause size neg: {self.get_clause_min_size(False)}\n"
-                      f"Mean clause size aff: {self.get_clause_mean_size(True)}\nMean clause size neg: {self.get_clause_mean_size(False)}\n"
-                      f"Cov metric aff: {self.covariance_matrix_statistic_true}\nCov metric neg: {self.covariance_matrix_statistic_false}")
             self.set_major_literal(True)
             return affirmation_metric - negation_metric
         else:
-            if verbose:
-                print(f"False importance exceeds true importance.\nAff met: {affirmation_metric}\nNeg met: {negation_metric}\nCov met: {self.covariance_matrix_statistic_false}")
-                print(f"Num aff: {self.num_affirmations}\nNum neg: {self.num_negations}\n"
-                      f"Min clause size aff: {self.get_clause_min_size(True)}\nMin clause size neg: {self.get_clause_min_size(False)}\n"
-                      f"Mean clause size aff: {self.get_clause_mean_size(True)}\nMean clause size neg: {self.get_clause_mean_size(False)}\n"
-                      f"Cov metric aff: {self.covariance_matrix_statistic_true}\nCov metric neg: {self.covariance_matrix_statistic_false}")
             self.set_major_literal(False)
             return negation_metric - affirmation_metric
-
-    def get_strength_of_difference(self):
-        if self.pure():
-            return 1
-        affirmation_metric = self.get_metric(True)*(np.tanh(self.covariance_matrix_statistic_true))
-        negation_metric = self.get_metric(False)*(np.tanh(self.covariance_matrix_statistic_false))
-        return abs((affirmation_metric-negation_metric)/(affirmation_metric+negation_metric))
 
     def set_major_literal(self, assignment):
         self.major_literal = assignment

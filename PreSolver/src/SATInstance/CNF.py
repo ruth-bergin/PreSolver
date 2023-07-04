@@ -321,13 +321,6 @@ class CNF:
                         index += self.num_literals
                     if other_assignment == -1:
                         other_index += self.num_literals
-                    try:
-                        self.covariance_matrix[index][other_index] += 1
-                        self.covariance_matrix[other_index][index] += 1
-                    except:
-                        raise ValueError(
-                            f"Covariance matrix size {len(self.covariance_matrix)} "
-                            f"with index {index} and other index {other_index}")
 
     def update_covariance_matrix_statistics(self):
         for literal in self.literals:
@@ -352,13 +345,14 @@ class CNF:
                 j += 1
             metrics.append(metric)
             i += 1
+        min_value = min([i[1] for i in count_value])*0.9
         for i in range(self.num_literals):
             if count_value[i][0]==0:
-                self.literals[i].covariance_matrix_statistics_true = 0
+                self.literals[i].covariance_matrix_statistics_true = min_value
             else:
                 self.literals[i].covariance_matrix_statistic_true = count_value[i][1]
         for i in range(self.num_literals, 2*self.num_literals):
             if count_value[i][0]==0:
-                self.literals[i-self.num_literals].covariance_matrix_statistic_false = 0
+                self.literals[i-self.num_literals].covariance_matrix_statistic_false = min_value
             else:
                 self.literals[i-self.num_literals].covariance_matrix_statistic_false = count_value[i][1]

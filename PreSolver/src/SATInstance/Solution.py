@@ -37,10 +37,9 @@ class Solution:
                 clause.remove(literal*-1)
 
     def get_var_as_int(self, variable, assignment):
+        sign = -1
         if assignment:
             sign = 1
-        else:
-            sign = -1
         return variable.org_index*sign
 
     def __str__(self):
