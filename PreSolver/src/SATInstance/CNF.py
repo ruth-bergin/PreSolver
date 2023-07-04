@@ -102,7 +102,7 @@ class CNF:
         success = self.handle_clause_removal_and_reduction(variable, is_negation)
         if success != 0:
             return -1
-        self.assignments.append((variable.index, not is_negation))
+        self.assignments.append((variable.org_index, not is_negation))
         variable.removed = True
         self.num_variables -= 1
         return 0
@@ -195,8 +195,9 @@ class CNF:
             print(f"Satisfiability: {self.solve()}")
         self.check_for_literal_clause_inconsistency()
         self.check_for_sat_violation()
-        self.update_covariance_matrix()
-        self.update_covariance_matrix_statistics()
+        if not self.solved:
+            self.update_covariance_matrix()
+            self.update_covariance_matrix_statistics()
         return success
 
     def check_for_literal_clause_inconsistency(self):

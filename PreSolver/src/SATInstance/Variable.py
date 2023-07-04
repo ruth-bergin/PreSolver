@@ -8,6 +8,7 @@ COVARIANCE_MATRIX_STATISTIC = "covariance matrix statistic"
 class Variable:
 
     def __init__(self, index):
+        self.org_index = index
         self.index = index
         self.affirmations = []
         self.negations = []

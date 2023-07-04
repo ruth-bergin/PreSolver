@@ -40,7 +40,7 @@ class Solution:
         sign = -1
         if assignment:
             sign = 1
-        return variable.org_index*sign
+        return variable*sign
 
     def __str__(self):
         num_clauses = len(self.cnf)

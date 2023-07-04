@@ -1,4 +1,5 @@
 from src.SATInstance.CNF import CNF
+from src.SATInstance.Solution import Solution
 from src.ml.RandomForest import SAT_RFC
 from random import choice
 
@@ -7,11 +8,13 @@ VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", 
 class VariableSelector:
 
     def __init__(self, cnf_string, cutoff=0.6, verbose=False, sep=" 0\n", use_dpll=True,dataset="cbs_dpll_50.txt",
-                 selection_complexity = "complete"):
+                 selection_complexity = "complete", fn=""):
         self.cnf = CNF(cnf_string, sep=sep)
+        self.solution = Solution(cnf_string, fn)
         self.cutoff = cutoff
         self.verbose = verbose
         self.assignments = 0
+        self.p = 0
         self.assignments_to_failure = 0
         self.selection_complexity = selection_complexity
         if self.verbose:
@@ -22,10 +25,10 @@ class VariableSelector:
         self.solved = False
         self.dataset=dataset
 
-    def run(self, to_failure=False):
+    def run(self, to_failure=False, single_path=False):
         better_option_sat_probability = self.cutoff + 0.1
         first_pass = True
-        branches_sat_probability, chosen_branch = None, None
+        branches_sat_probability, assignment = None, None
         i = 0
         last_known_sat = str(self.cnf)
         if self.verbose:
@@ -35,15 +38,13 @@ class VariableSelector:
                 last_known_sat = str(self.cnf)
             i += 1
             if self.verbose:
-                print(f"CNF currently has {self.cnf.num_literals} literals "
+                print(f"CNF currently has {self.cnf.num_variables} literals "
                       f"and {self.cnf.num_clauses} clauses left.\n**ASSIGNMENT {i}**")
             if not first_pass:
                 if self.verbose:
                     print("Sat probability of {} exceeds cutoff {}. Assigning variable"
                           .format(better_option_sat_probability, self.cutoff))
-                self.cnf = chosen_branch
-                if self.lowest_reached>better_option_sat_probability:
-                    self.lowest_reached=better_option_sat_probability
+                self.cnf.assign_literal_by_integer(branches_sat_probability[VARIABLE].index*assignment)
                 if to_failure:
                     if not self.cnf.solve():
                         return 0, self.cnf
@@ -61,11 +62,19 @@ class VariableSelector:
                 if self.verbose:
                     print("Both branches unsat. Terminating.")
                 return 3, CNF(last_known_sat)
-            if branches_sat_probability[TRUE] - branches_sat_probability[FALSE]>0:
-                chosen_branch = branches_sat_probability[BRANCH_TRUE]
+            if single_path:
+                variable = branches_sat_probability[VARIABLE]
+                if variable.major_literal:
+                    assignment=1
+                    better_option_sat_probability = branches_sat_probability[TRUE]
+                else:
+                    assignment = -1
+                    better_option_sat_probability = branches_sat_probability[FALSE]
+            elif branches_sat_probability[TRUE] - branches_sat_probability[FALSE]>0:
+                assignment = 1
                 better_option_sat_probability = branches_sat_probability[TRUE]
             else:
-                chosen_branch = branches_sat_probability[BRANCH_FALSE]
+                assignment = -1
                 better_option_sat_probability = branches_sat_probability[FALSE]
 
         if self.verbose:
@@ -142,3 +151,8 @@ class VariableSelector:
                                 -(literal.num_negations/min(literal.negations,default=1).size)) == best]
             return literal[0]
 
+    def update_solution(self):
+        new_assignments = self.cnf.assignments[self.p:]
+        for variable, assignment in new_assignments:
+            self.solution.add_assignment(variable, assignment)
+        self.p = len(self.solution.assignments)

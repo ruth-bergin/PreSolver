@@ -6,7 +6,7 @@ from ..SATfeatPy.sat_instance.sat_instance import *
 import matplotlib.pyplot as plt
 
 TRAIN, TEST = "train", "test"
-INTERMEDIARY_FILENAME = "../../instances/intermediary/shadow_cnf_features.txt"
+INTERMEDIARY_FILENAME = "../instances/intermediary/shadow_cnf_features.txt"
 
 class SAT_RFC:
 
@@ -57,7 +57,7 @@ class SAT_RFC:
         }
 
     def predict_sat(self, cnf_string):
-        filename = open("../../instances/intermediary/shadow_cnf_dominant.txt", "w")
+        filename = open("../instances/intermediary/shadow_cnf_dominant.txt", "w")
         filename.write(cnf_string)
         filename.close()
         self.write_satfeatpy_features_to_file(["../instances/intermediary/shadow_cnf_dominant.txt"])
