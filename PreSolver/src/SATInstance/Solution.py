@@ -4,13 +4,18 @@ class Solution:
     def __init__(self, cnf_string, filename):
         self.assignments = []
         self.filename = filename
+        if filename=="":
+            self.save_to_file = False
+        else:
+            self.save_to_file = True
         self.cnf = None
+        cnf_string = cnf_string[cnf_string.find("p cnf"):]
         self.num_variables = int(cnf_string[:cnf_string.find("\n")].split(" ")[2])
         self.construct(cnf_string)
 
     def construct(self, cnf_string):
         clauses = [clause for clause in cnf_string[cnf_string.find("\n"):].split(" 0\n") if clause!=""]
-        self.cnf = [[int(var) for var in clause.split(" ")] for clause in clauses]
+        self.cnf = [[int(var) for var in clause.split(" ") if var!=""] for clause in clauses if clause!=""]
 
     def add_assignment(self, variable, assignment):
         literal = self.get_var_as_int(variable, assignment)
@@ -21,10 +26,11 @@ class Solution:
         self.assignments.append(literal)
         self.cnf = [[literal]] + self.cnf
 
-        filename = f"{self.filename}_freqClauseCov_p{len(self.assignments)}_x{literal}.cnf"
-        file = open(f"../instances/andrea/DatasetA/processed/{filename}", "w+")
-        file.write(str(self))
-        file.close()
+        if self.save_to_file:
+            filename = f"{self.filename[:-4]}_frequency_p{len(self.assignments)}_x{literal}.cnf"
+            file = open(filename, "w+")
+            file.write(str(self))
+            file.close()
 
     def handle_clause_removal_and_reduction(self, literal):
         i = len(self.cnf)
