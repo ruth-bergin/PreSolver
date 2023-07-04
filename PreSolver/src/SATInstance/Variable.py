@@ -5,7 +5,7 @@ CLAUSE_SUMMARY_STATS, CLAUSE_MIN_SIZE, CLAUSE_MAX_SIZE = "clause summary stats",
 CLAUSE_MEDIAN_SIZE, CLAUSE_MEAN_SIZE, CLAUSE_STD_SIZE = "clause median size", "clause mean size", "clause std size"
 COVARIANCE_MATRIX_STATISTIC = "covariance matrix statistic"
 
-class Literal:
+class Variable:
 
     def __init__(self, index):
         self.index = index

@@ -18,7 +18,7 @@ class DatasetPopulator:
         while (str(prev_cnf)!=str(self.cnf)):
             prev_cnf = self.cnf
             # Choose a random variable
-            variable = randint(1, self.cnf.num_literals)
+            variable = randint(1, self.cnf.num_variables)
             # Valid branches to pursue - relevant if only following SAT branches
             valid = []
             # Assigning both ways
@@ -49,14 +49,14 @@ class DatasetPopulator:
         return string
 
     def write_and_solve_shadow_cnf(self, variable, assignment):
-        if variable>self.cnf.num_literals:
+        if variable>self.cnf.num_variables:
             raise IndexError("Num literals changed since function call.")
         # Create a copy of the CNF so the original is unchanged
         shadow_cnf = CNF(str(self.cnf))
-        if variable>shadow_cnf.num_literals:
-            raise IndexError(f"Num literals changed since shadow cnf formation. Variable {variable} num lit {shadow_cnf.num_literals}")
+        if variable>shadow_cnf.num_variables:
+            raise IndexError(f"Num literals changed since shadow cnf formation. Variable {variable} num lit {shadow_cnf.num_variables}")
         outcome = shadow_cnf.assign_literal_by_integer(variable*assignment)
-        name = f"../instances/population/{self.i}_n{self.cnf.num_literals}_m{self.cnf.num_clauses}_{variable}{str(assignment>0)}.txt"
+        name = f"../instances/population/{self.i}_n{self.cnf.num_variables}_m{self.cnf.num_clauses}_{variable}{str(assignment > 0)}.txt"
         # Return the original cnf if assignment aborted
         if outcome != 0:
             shadow_cnf = CNF(str(self.cnf))

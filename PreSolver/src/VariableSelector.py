@@ -120,25 +120,25 @@ class VariableSelector:
 
     def select_next_variable(self):
         if self.selection_complexity=="complete":
-            return max(self.cnf.literals)
+            return max(self.cnf.variables)
         elif self.selection_complexity=="random":
-            return choice(self.cnf.literals)
+            return choice(self.cnf.variables)
         elif self.selection_complexity=="appearances":
-            for literal in self.cnf.literals:
+            for literal in self.cnf.variables:
                 if literal.pure():
                     return literal
-            best = max([abs(literal.num_affirmations-literal.num_negations) for literal in self.cnf.literals])
-            literal = [literal for literal in self.cnf.literals if abs(literal.num_affirmations-literal.num_negations)==best]
+            best = max([abs(literal.num_affirmations-literal.num_negations) for literal in self.cnf.variables])
+            literal = [literal for literal in self.cnf.variables if abs(literal.num_affirmations - literal.num_negations) == best]
             return literal[0]
         elif self.selection_complexity=="importance":
-            for literal in self.cnf.literals:
+            for literal in self.cnf.variables:
                 if literal.pure():
                     return literal
             best = max([abs((literal.num_affirmations/min(literal.affirmations,default=1).size)
                             -(literal.num_negations/min(literal.negations,default=1).size))
-                            for literal in self.cnf.literals])
-            literal = [literal for literal in self.cnf.literals if
-                        abs((literal.num_affirmations/min(literal.affirmations,default=1).size)
-                                -(literal.num_negations/min(literal.negations,default=1).size))==best]
+                        for literal in self.cnf.variables])
+            literal = [literal for literal in self.cnf.variables if
+                       abs((literal.num_affirmations/min(literal.affirmations,default=1).size)
+                                -(literal.num_negations/min(literal.negations,default=1).size)) == best]
             return literal[0]
 
