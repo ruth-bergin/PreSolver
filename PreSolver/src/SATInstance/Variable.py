@@ -1,4 +1,3 @@
-from random import randint
 import numpy as np
 
 CLAUSE_SUMMARY_STATS, CLAUSE_MIN_SIZE, CLAUSE_MAX_SIZE = "clause summary stats", "clause min size", "clause max size"

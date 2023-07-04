@@ -3,6 +3,7 @@ from os import listdir
 
 path = "../instances/andrea/DatasetA/"
 
+solved = 0
 for filename in [file for file in listdir(path) if file != "processed"]:
     file = open(path+filename, "r")
     cnf_string = file.read()
@@ -12,3 +13,8 @@ for filename in [file for file in listdir(path) if file != "processed"]:
                                 fn=filename)
 
     selector.run(single_path=True)
+
+    if selector.cnf.solved:
+        solved += 1
+
+print(solved)

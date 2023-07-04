@@ -45,6 +45,7 @@ class VariableSelector:
                     print("Sat probability of {} exceeds cutoff {}. Assigning variable"
                           .format(better_option_sat_probability, self.cutoff))
                 self.cnf.assign_literal_by_integer(branches_sat_probability[VARIABLE].index*assignment)
+                self.update_solution()
                 if to_failure:
                     if not self.cnf.solve():
                         return 0, self.cnf
