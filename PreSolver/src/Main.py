@@ -14,16 +14,16 @@ for index, filename in enumerate(listdir(path)):
     file.close()
     print(f"File {index}")
 
-    file = open(path+"processed/"+filename[:-4]+"_freqClause_p0.cnf", "w")
+    file = open(path+"processed/"+filename[:-4]+"_dlis_p0.cnf", "w")
     file.write(cnf_string)
     file.close()
 
-    selector = VariableSelector(cnf_string, cutoff=0, use_dpll=False, dataset="cbs_base_50.txt",
-                                fn=path+"processed/"+filename)
+    selector = VariableSelector(cnf_string, cutoff=-1, use_dpll=False, dataset="cbs_base_50.txt",
+                                fn=path+"processed/"+filename, verbose=True)
 
     selector.run(single_path=True)
 
-    if selector.cnf.solved:
+    if selector.solved:
         solved += 1
     else:
         print(f"File {index} unsolved but still sat")

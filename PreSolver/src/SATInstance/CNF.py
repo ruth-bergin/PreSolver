@@ -262,6 +262,9 @@ class CNF:
             variable.affirmations = [clause for clause in variable.affirmations if not clause.removed]
             variable.negations = [clause for clause in variable.negations if not clause.removed]
             variable.num_affirmations, variable.num_negations = len(variable.affirmations), len(variable.negations)
+        for variable in self.variables:
+            if (variable.num_negations + variable.num_affirmations) == 0 and not variable.removed:
+                self.assign_variable(variable, True)
         self.variables = [variable for variable in self.variables
                           if not variable.removed and variable.num_negations + variable.num_affirmations > 0]
         for index, clause in enumerate(self.clauses):
@@ -273,13 +276,15 @@ class CNF:
         if self.num_clauses < 2:
             self.solved = True
             return 0
-        self.unary_clauses = [clause for clause in self.clauses if clause.size == 1]
+        self.unary_clauses = [clause for clause in self.clauses if len(clause.literals) == 1]
         if self.variables[-1].index!=self.num_variables:
             raise ValueError(f"Largest index {self.variables[-1].index} with {self.num_variables} literals counted.")
         if self.verbose:
             print("Propagating from rearrange()")
         success = self.propagate_units()
         if success == 0:
+            if self.verbose:
+                print("Propagating from rearrange() at depth")
             return self.rearrange()
         elif success < 0:
             return -1

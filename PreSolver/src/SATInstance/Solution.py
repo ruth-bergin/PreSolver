@@ -19,15 +19,15 @@ class Solution:
 
     def add_assignment(self, variable, assignment):
         literal = self.get_var_as_int(variable, assignment)
+        self.assignments.append((variable,assignment))
         self.handle_clause_removal_and_reduction(literal)
         self.add_unit_clause(literal)
 
     def add_unit_clause(self, literal):
-        self.assignments.append(literal)
         self.cnf = [[literal]] + self.cnf
 
         if self.save_to_file:
-            filename = f"{self.filename[:-4]}_freqClause_p{len(self.assignments)}_x{literal}.cnf"
+            filename = f"{self.filename[:-4]}_dlis_p{len(self.assignments)}_x{literal}.cnf"
             file = open(filename, "w+")
             file.write(str(self))
             file.close()
