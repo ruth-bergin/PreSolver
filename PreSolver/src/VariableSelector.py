@@ -63,7 +63,8 @@ class VariableSelector:
                 self.cnf.assign_literal_by_integer(variable.index*variable.major_literal)
                 self.update_solution()
                 for variable in self.cnf.variables:
-                    self.solution.add_assignment(variable.org_index, True)
+                    print(f"Adding variable {variable.org_index} to complete solution")
+                    self.solution.add_assignment(variable.org_index, variable.major_literal)
                 return 0, self.cnf
             elif branches_sat_probability[TRUE]==0 and branches_sat_probability[FALSE]==0:
                 if self.verbose:

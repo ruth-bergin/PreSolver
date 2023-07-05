@@ -31,10 +31,10 @@ class Variable:
         negation_metric = self.get_metric(False) #*self.covariance_matrix_statistic_false
         if affirmation_metric>negation_metric:
             self.set_major_literal(True)
-            return affirmation_metric - negation_metric
+            return affirmation_metric #- negation_metric
         else:
             self.set_major_literal(False)
-            return negation_metric - affirmation_metric
+            return negation_metric #- affirmation_metric
 
     def set_major_literal(self, assignment):
         self.major_literal = assignment
@@ -46,9 +46,9 @@ class Variable:
             else:
                 return self.num_negations
         if assignment:
-            return (self.num_affirmations) #/(self.get_clause_mean_size(True)+self.get_clause_min_size(True))
+            return self.num_affirmations #/(self.get_clause_mean_size(True)+self.get_clause_min_size(True))
         else:
-            return (self.num_negations) #/(self.get_clause_mean_size(False)+self.get_clause_min_size(False))
+            return self.num_negations #/(self.get_clause_mean_size(False)+self.get_clause_min_size(False))
 
     def get_clause_mean_size(self, affirmation):
         if affirmation:

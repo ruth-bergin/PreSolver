@@ -19,7 +19,7 @@ for index, filename in enumerate(listdir(path)):
     file.close()
 
     selector = VariableSelector(cnf_string, cutoff=-1, use_dpll=False, dataset="cbs_base_50.txt",
-                                fn=path+"processed/"+filename, verbose=True)
+                                fn=path+"processed/"+filename, verbose=False)
 
     selector.run(single_path=True)
 
@@ -31,6 +31,8 @@ for index, filename in enumerate(listdir(path)):
         sat += 1
     print(selector.cnf.solve())
     assignments_to_failure.append(selector.assignments_to_failure)
+    if len(selector.solution.assignments)<14:
+        raise ValueError("Issue remains")
 
 print(f"SOLVED:\t{solved}\nSAT:\t{sat}")
 print(assignments_to_failure)
