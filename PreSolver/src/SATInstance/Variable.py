@@ -20,6 +20,7 @@ class Variable:
         self.covariance_matrix_statistic_true = 0
         self.covariance_matrix_statistic_false = 0
         self.instance_num_clauses = 0
+        self.reason_for_assignment = 0
 
     def get_heuristic(self, verbose=False):
         if self.pure():
@@ -83,6 +84,13 @@ class Variable:
         if affirmation:
             clause_stats = self.affirmation_statistics[CLAUSE_SUMMARY_STATS]
             clauses = [clause.size for clause in self.affirmations]
+        if len(clauses)<1:
+            clause_stats[CLAUSE_MIN_SIZE] = 0
+            clause_stats[CLAUSE_MAX_SIZE] = 0
+            clause_stats[CLAUSE_MEAN_SIZE] = 0
+            clause_stats[CLAUSE_MEDIAN_SIZE] = 0
+            clause_stats[CLAUSE_STD_SIZE] = 0
+            return
         clause_stats[CLAUSE_MIN_SIZE] = min(clauses)
         clause_stats[CLAUSE_MAX_SIZE] = max(clauses)
         clause_stats[CLAUSE_MEAN_SIZE] = np.mean(clauses)
@@ -101,16 +109,30 @@ class Variable:
     def appearances(self):
         return self.num_negations + self.num_affirmations
 
+    def score(self):
+        if self.unit:
+            return -2
+        if self.pure():
+            return -3
+        if self.obsolete:
+            return -4
+        if self.post_solution:
+            return -5
+        return self.get_heuristic()
+
+
     def __gt__(self, other):
         if self.pure() and not other.pure():
             return True
         elif other.pure() and self.pure():
-            return self.num_affirmations+self.num_negations
+            return self.appearances()>other.appearances()
         return self.get_heuristic() > other.get_heuristic()
 
     def __lt__(self, other):
         if (not self.pure()) and other.pure():
             return True
+        if self.pure() and other.pure():
+            return self.appearances()<other.appearances()
         return self.get_heuristic() < other.get_heuristic()
 
     def __str__(self):

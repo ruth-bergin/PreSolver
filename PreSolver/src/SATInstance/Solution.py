@@ -17,17 +17,22 @@ class Solution:
         clauses = [clause for clause in cnf_string[cnf_string.find("\n"):].split(" 0\n") if clause!=""]
         self.cnf = [[int(var) for var in clause.split(" ") if var!=""] for clause in clauses if clause!=""]
 
-    def add_assignment(self, variable, assignment):
+    def add_assignment(self, variable, assignment, reason=0):
+        if reason!=0:
+            variable.reason_for_assignment=reason
         literal = self.get_var_as_int(variable, assignment)
         self.assignments.append((variable,assignment))
         self.handle_clause_removal_and_reduction(literal)
-        self.add_unit_clause(literal)
+        self.add_unit_clause(literal, variable.reason_for_assignment)
 
-    def add_unit_clause(self, literal):
+    def add_unit_clause(self, literal, reason=0):
         self.cnf = [[literal]] + self.cnf
 
+        if reason==-2:
+            input("Found unit")
+
         if self.save_to_file:
-            filename = f"{self.filename[:-4]}_dlis_p{len(self.assignments)}_x{literal}.cnf"
+            filename = f"{self.filename[:-4]}_dlis_p{len(self.assignments)}_x{literal}_s{reason}.cnf"
             file = open(filename, "w+")
             file.write(str(self))
             file.close()
@@ -46,7 +51,7 @@ class Solution:
         sign = -1
         if assignment:
             sign = 1
-        return variable*sign
+        return variable.org_index*sign
 
     def __str__(self):
         num_clauses = len(self.cnf)

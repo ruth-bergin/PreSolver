@@ -16,6 +16,7 @@ class CNF:
         self.variables = []
         self.unary_clauses = []
         self.assignments = []
+        self.temp_assignments = []
         self.construct(cnf_string, sep)
         self.update_covariance_matrix()
         self.update_covariance_matrix_statistics()
@@ -74,11 +75,6 @@ class CNF:
             return 1
         return -1
 
-    def set_solved(self):
-        if not self.sat:
-            raise ValueError("Marking as solved when unsat.")
-        self.solved = True
-
     def solve(self):
         s = Solver(name='g4')
         for clause in self.get_as_list_of_clauses():
@@ -88,7 +84,8 @@ class CNF:
     def get_as_list_of_clauses(self):
         return [[int(variable.index * sign) for variable, sign in clause.literals] for clause in self.clauses]
 
-    def assign_variable(self, variable, is_negation):
+    def assign_variable(self, variable, is_negation, reason):
+        variable.reason_for_assignment = reason
         if (variable, self.get_sign_from_bool(is_negation)) in [clause.literals[0] for clause in self.unary_clauses]:
             if self.verbose:
                 print("Contradictory unit clauses. Aborting.")
@@ -102,7 +99,7 @@ class CNF:
         success = self.handle_clause_removal_and_reduction(variable, is_negation)
         if success != 0:
             return -1
-        self.assignments.append((variable.org_index, not is_negation))
+        self.temp_assignments.append((variable, not is_negation))
         variable.removed = True
         self.num_variables -= 1
         return 0
@@ -172,7 +169,7 @@ class CNF:
             if not clause.removed:
                 variable, is_negation = clause.literals[0][0], clause.literals[0][1] < 0
                 if not variable.removed:
-                    success = self.assign_variable(variable, is_negation)
+                    success = self.assign_variable(variable, is_negation, -2)
                     if success != 0:
                         if self.verbose:
                             print("Failed to assign unit clause. Aborting.")
@@ -184,10 +181,18 @@ class CNF:
             self.unary_clauses.remove(clause)
         return 0
 
-    def assign_literal_by_integer(self, integer):
+    def assign_literal_by_integer(self, integer, reason=0):
+        if integer == 0:
+            raise ValueError("Something is wrong")
         variable, is_negation = self.get_literal_from_integer(integer)
-        success = self.assign_variable(variable, is_negation)
+        if reason!=0:
+            success = self.assign_variable(variable, is_negation, reason)
+        elif variable.pure():
+            success = self.assign_variable(variable, is_negation, -3)
+        else:
+            success = self.assign_variable(variable, is_negation, variable.get_heuristic())
         if success < 0:
+            self.temp_assignments = []
             return success
         success = self.rearrange()
         if self.verbose:
@@ -198,6 +203,8 @@ class CNF:
         if not self.solved:
             self.update_covariance_matrix()
             self.update_covariance_matrix_statistics()
+        self.assignments += self.temp_assignments
+        self.temp_assignments = []
         return success
 
     def check_for_literal_clause_inconsistency(self):
@@ -264,7 +271,7 @@ class CNF:
             variable.num_affirmations, variable.num_negations = len(variable.affirmations), len(variable.negations)
         for variable in self.variables:
             if (variable.num_negations + variable.num_affirmations) == 0 and not variable.removed:
-                self.assign_variable(variable, True)
+                self.assign_variable(variable, True, -4)
         self.variables = [variable for variable in self.variables
                           if not variable.removed and variable.num_negations + variable.num_affirmations > 0]
         for index, clause in enumerate(self.clauses):

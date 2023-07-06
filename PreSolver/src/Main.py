@@ -29,10 +29,7 @@ for index, filename in enumerate(listdir(path)):
         print(f"File {index} unsolved but still sat")
     if selector.cnf.solve():
         sat += 1
-    print(selector.cnf.solve())
     assignments_to_failure.append(selector.assignments_to_failure)
-    if len(selector.solution.assignments)<14:
-        raise ValueError("Issue remains")
 
 print(f"SOLVED:\t{solved}\nSAT:\t{sat}")
 print(assignments_to_failure)

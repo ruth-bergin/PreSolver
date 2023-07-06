@@ -59,12 +59,14 @@ class VariableSelector:
                 if self.verbose:
                     print("Solved.")
                 variable = branches_sat_probability[VARIABLE]
-
-                self.cnf.assign_literal_by_integer(variable.index*variable.major_literal)
+                assignment = -1
+                if variable.major_literal:
+                    assignment = 1
+                self.cnf.assign_literal_by_integer(variable.index*assignment)
                 self.update_solution()
                 for variable in self.cnf.variables:
-                    print(f"Adding variable {variable.org_index} to complete solution")
-                    self.solution.add_assignment(variable.org_index, variable.major_literal)
+                    variable.post_solution=True
+                    self.solution.add_assignment(variable, variable.major_literal, -5)
                 return 0, self.cnf
             elif branches_sat_probability[TRUE]==0 and branches_sat_probability[FALSE]==0:
                 if self.verbose:
