@@ -28,9 +28,6 @@ class Solution:
     def add_unit_clause(self, literal, reason=0):
         self.cnf = [[literal]] + self.cnf
 
-        if reason==-2:
-            input("Found unit")
-
         if self.save_to_file:
             filename = f"{self.filename[:-4]}_dlis_p{len(self.assignments)}_x{literal}_s{reason}.cnf"
             file = open(filename, "w+")

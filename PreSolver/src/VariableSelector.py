@@ -10,7 +10,7 @@ class VariableSelector:
     def __init__(self, cnf_string, cutoff=0.6, verbose=False, sep=" 0\n", use_dpll=True,dataset="cbs_dpll_50.txt",
                  selection_complexity = "complete", fn=""):
         self.cnf = CNF(cnf_string, sep=sep, verbose=verbose)
-        self.solution = Solution(cnf_string, fn)
+        self.solution = Solution(str(self.cnf), fn)
         self.cutoff = cutoff
         self.verbose = verbose
         self.assignments = 0
@@ -56,7 +56,7 @@ class VariableSelector:
                 self.assignments_to_failure = self.assignments
             branches_sat_probability = self.branch_cnf()
             if self.solved:
-                if self.verbose:
+                if self.verbose or True:
                     print("Solved.")
                 variable = branches_sat_probability[VARIABLE]
                 assignment = -1
