@@ -84,9 +84,9 @@ class CNF:
     def get_as_list_of_clauses(self):
         return [[int(variable.index * sign) for variable, sign in clause.literals] for clause in self.clauses]
 
-    def assign_variable(self, variable, is_negation, reason):
+    def assign_variable(self, variable, assignment, reason):
         variable.reason_for_assignment = reason
-        if (variable, self.get_sign_from_bool(is_negation)) in [clause.literals[0] for clause in self.unary_clauses]:
+        if (variable, self.get_sign_from_bool(not assignment)) in [clause.literals[0] for clause in self.unary_clauses]:
             if self.verbose:
                 print("Contradictory unit clauses. Aborting.")
             return -1
@@ -95,17 +95,16 @@ class CNF:
         if self.solved:
             return
         if self.verbose:
-            print("Assigning value {} to literal {}".format(not is_negation, variable.index))
-        success = self.handle_clause_removal_and_reduction(variable, is_negation)
+            print("Assigning value {} to literal {}".format(assignment, variable.index))
+        success = self.handle_clause_removal_and_reduction(variable, assignment)
         if success != 0:
             return -1
-        self.temp_assignments.append((variable, not is_negation))
+        self.temp_assignments.append((variable, assignment))
         variable.removed = True
         self.num_variables -= 1
         return 0
 
-    def handle_clause_removal_and_reduction(self, variable, is_negation):
-        assignment = not is_negation
+    def handle_clause_removal_and_reduction(self, variable, assignment):
         satisfied_clauses, unsatisfied_clauses = variable.negations, variable.affirmations
         if assignment:
             satisfied_clauses, unsatisfied_clauses = variable.affirmations, variable.negations
@@ -167,9 +166,9 @@ class CNF:
                     f"Current unary clause list: {[str(clause) for clause in self.unary_clauses]}")
             clause = self.unary_clauses[-1]
             if not clause.removed:
-                variable, is_negation = clause.literals[0][0], clause.literals[0][1] < 0
+                variable, assignment = clause.literals[0][0], clause.literals[0][1] > 0
                 if not variable.removed:
-                    success = self.assign_variable(variable, is_negation, -2)
+                    success = self.assign_variable(variable, assignment, -2)
                     if success != 0:
                         if self.verbose:
                             print("Failed to assign unit clause. Aborting.")
@@ -184,13 +183,13 @@ class CNF:
     def assign_literal_by_integer(self, integer, reason=0):
         if integer == 0:
             raise ValueError("Something is wrong")
-        variable, is_negation = self.get_literal_from_integer(integer)
+        variable, assignment = self.get_literal_from_integer(integer)
         if reason!=0:
-            success = self.assign_variable(variable, is_negation, reason)
+            success = self.assign_variable(variable, assignment, reason)
         elif variable.pure():
-            success = self.assign_variable(variable, is_negation, -3)
+            success = self.assign_variable(variable, assignment, -3)
         else:
-            success = self.assign_variable(variable, is_negation, variable.get_heuristic())
+            success = self.assign_variable(variable, assignment, variable.get_heuristic())
         if success < 0:
             self.temp_assignments = []
             return success
@@ -252,14 +251,14 @@ class CNF:
 
 
     def get_literal_from_integer(self, integer):
-        variable_index, is_negation = abs(integer) - 1, integer < 0
+        variable_index, assignment = abs(integer) - 1, integer > 0
         try:
             variable = self.variables[variable_index]
         except Exception as e:
             print(
                 f"{e}: attempting to access index {variable_index} with list length {len(self.variables)} and num literals {self.num_variables}")
             raise e
-        return variable, is_negation
+        return variable, assignment
 
     def rearrange(self):
         if self.solved or (self.num_variables == len(self.variables) and self.num_clauses == len(self.clauses)):
