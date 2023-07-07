@@ -263,17 +263,17 @@ class CNF:
 
     def rearrange(self):
         if self.solved or (self.num_variables == len(self.variables) and self.num_clauses == len(self.clauses)):
+            if self.assign_any_obsolete_variables():
+                return self.rearrange()
             return 0
         self.clauses = [clause for clause in self.clauses if not clause.removed and clause.size > 0]
         for variable in self.variables:
             variable.affirmations = [clause for clause in variable.affirmations if not clause.removed]
             variable.negations = [clause for clause in variable.negations if not clause.removed]
             variable.num_affirmations, variable.num_negations = len(variable.affirmations), len(variable.negations)
-        for variable in self.variables:
-            if (variable.num_negations + variable.num_affirmations) == 0 and not variable.removed:
-                self.assign_variable(variable, True, -4)
+        self.assign_any_obsolete_variables()
         self.variables = [variable for variable in self.variables
-                          if not variable.removed and variable.num_negations + variable.num_affirmations > 0]
+                          if not variable.removed and len(variable.negations) + len(variable.affirmations) > 0]
         for index, clause in enumerate(self.clauses):
             clause.index = index
         for index, variable in enumerate(self.variables):
@@ -297,7 +297,18 @@ class CNF:
             return -1
         for variable in self.variables:
             variable.instance_num_clauses = self.num_clauses
+        for variable in self.variables:
+            if len(variable.affirmations)+len(variable.negations)==0:
+                raise ValueError("Problem in rearrange")
         return 0
+
+    def assign_any_obsolete_variables(self):
+        assignment_made = False
+        for variable in self.variables:
+            if (variable.num_negations + variable.num_affirmations) == 0 and not variable.removed:
+                self.assign_variable(variable, True, -4)
+                assignment_made=True
+        return assignment_made
 
     def check_for_sat_violation(self):
         if not self.sat and self.solve():
