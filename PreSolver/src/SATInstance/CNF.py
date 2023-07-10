@@ -15,6 +15,7 @@ class CNF:
         self.clauses = []
         self.variables = []
         self.unary_clauses = []
+        self.obsolete_variables = []
         self.assignments = []
         self.temp_assignments = []
         self.construct(cnf_string, sep)
@@ -36,7 +37,6 @@ class CNF:
             try:
                 description, first_clause = [line.strip() for line in line1.split("\n")]
             except Exception as e:
-                print(line1.split("\n"))
                 raise e
             lines = [line for line in [first_clause] + rest_of_text if line != ""]
         else:
@@ -262,7 +262,7 @@ class CNF:
 
     def rearrange(self):
         if self.solved or (self.num_variables == len(self.variables) and self.num_clauses == len(self.clauses)):
-            if self.assign_any_obsolete_variables():
+            if self.handle_obsolete_variables():
                 return self.rearrange()
             return 0
         self.clauses = [clause for clause in self.clauses if not clause.removed and clause.size > 0]
@@ -270,9 +270,7 @@ class CNF:
             variable.affirmations = [clause for clause in variable.affirmations if not clause.removed]
             variable.negations = [clause for clause in variable.negations if not clause.removed]
             variable.num_affirmations, variable.num_negations = len(variable.affirmations), len(variable.negations)
-        self.assign_any_obsolete_variables()
-        self.variables = [variable for variable in self.variables
-                          if not variable.removed and len(variable.negations) + len(variable.affirmations) > 0]
+        self.handle_obsolete_variables()
         for index, clause in enumerate(self.clauses):
             clause.index = index
         for index, variable in enumerate(self.variables):
@@ -301,13 +299,12 @@ class CNF:
                 raise ValueError("Problem in rearrange")
         return 0
 
-    def assign_any_obsolete_variables(self):
-        assignment_made = False
-        for variable in self.variables:
-            if (variable.num_negations + variable.num_affirmations) == 0 and not variable.removed:
-                self.assign_variable(variable, True, -4)
-                assignment_made=True
-        return assignment_made
+    def handle_obsolete_variables(self):
+        org_len = len(self.obsolete_variables)
+        self.obsolete_variables = [variable for variable in self.variables
+                                   if (not variable.removed) and variable.appearances()==0]
+        self.variables = [variable for variable in self.variables if not variable.removed and variable.appearances()>0]
+        return len(self.obsolete_variables)>org_len
 
     def check_for_sat_violation(self):
         if not self.sat and self.solve():

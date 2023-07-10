@@ -65,7 +65,7 @@ class VariableSelector:
                     assignment = 1
                 self.cnf.assign_literal_by_integer(variable.index*assignment)
                 self.update_solution()
-                for variable in self.cnf.variables:
+                for variable in self.cnf.variables+self.cnf.obsolete_variables:
                     variable.post_solution=True
                     self.solution.add_assignment(variable, variable.major_literal, -5)
                 return 0, self.cnf

@@ -14,7 +14,7 @@ for index, filename in enumerate(listdir(path)):
     file.close()
     print(f"File {index}")
 
-    file = open(path+"processed/"+filename[:-4]+"_dlis_p0.cnf", "w")
+    file = open(path+"processed/"+filename[:-4]+"_dlisObsoleteVarsReserved_p0.cnf", "w")
     file.write(cnf_string)
     file.close()
 
