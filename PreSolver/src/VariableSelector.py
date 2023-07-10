@@ -34,6 +34,7 @@ class VariableSelector:
         if self.verbose:
             print("Running first pass")
         while better_option_sat_probability > self.cutoff:
+            print(f"On assignment {self.assignments}")
             if self.rfc.predict_sat(str(self.cnf)):
                 last_known_sat = str(self.cnf)
             i += 1

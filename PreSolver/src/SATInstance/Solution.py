@@ -23,7 +23,7 @@ class Solution:
         literal = self.get_var_as_int(variable, assignment)
         self.assignments.append((variable,assignment))
         self.handle_clause_removal_and_reduction(literal)
-        self.add_unit_clause(literal, variable.reason_for_assignment)
+        self.add_unit_clause(literal, round(variable.reason_for_assignment))
 
     def add_unit_clause(self, literal, reason=0):
         self.cnf = [[literal]] + self.cnf

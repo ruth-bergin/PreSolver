@@ -334,41 +334,67 @@ class CNF:
         return string
 
     def update_covariance_matrix(self):
+        # Initialise square matrix of size number of literals, all 0.
         self.covariance_matrix = [[0 for i in range(self.num_variables * 2)] for j in range(self.num_variables * 2)]
         for clause in self.clauses:
+            # For each clause, compare each variable to each other
             for variable, assignment in clause.literals:
                 for other_variable, other_assignment in clause.literals:
+                    # Make each variable skip over itself
+                    if variable==other_variable:
+                        continue
+                    # Off-by-one indexing
                     index, other_index = variable.index - 1, other_variable.index - 1
+                    # if literal is negative go to second half of covariance matrix
                     if assignment==-1:
                         index += self.num_variables
                     if other_assignment == -1:
                         other_index += self.num_variables
+                    # These literals share a clause
+                    self.covariance_matrix[index][other_index] += 1
 
     def update_covariance_matrix_statistics(self):
         for variable in self.variables:
             variable.calculate_clause_summary_statistics()
-        count_value = [[1,0] for i in range(self.num_variables * 2)]
+        # number of covariant literals and the sum of their negated values for each literal
+        count_value = [[0,0] for i in range(self.num_variables * 2)]
         metrics = []
         i= 0
+        # for every literal
         while i < self.num_variables*2:
             j = 0
+            # get the total number of covariant literals
             total_children = sum(self.covariance_matrix[i])
+            # if it doesn't share with anybody it doesn't matter
             if total_children == 0:
                 metric = 0
+            # For the positive literals - get the negated literal metric
             elif i < self.num_variables:
-                metric = self.variables[i].get_metric(False) / self.variables[i].get_metric(True)
+                metric = self.variables[i].get_metric(False)
+                # divide amongst potential satisfiers
                 metric = metric/total_children
+            # For the negative literals - get the negated (positive) literal metric
             else:
-                metric = self.variables[i - self.num_variables].get_metric(True) / self.variables[i - self.num_variables].get_metric(False)
+                # back to variables instead of literals
+                metric = self.variables[i - self.num_variables].get_metric(True)
                 metric = metric/total_children
+            # Weight the metric by the number of clauses shared
             while j < self.num_variables*2:
+                # Skip literals with no common clauses
+                if self.covariance_matrix[i][j]==0:
+                    j+=1
+                    continue
+                # Increase the count of covariant literals by one
                 count_value[j][0] += 1
+                # Increment the weight of the covariance of the literal
                 count_value[j][1] += metric * self.covariance_matrix[i][j]
                 j += 1
             metrics.append(metric)
             i += 1
-        min_value = min([i[1] for i in count_value])*0.9
+        # we don't want this to be 0
+        min_value = min([i[1] for i in count_value if i!=0])*0.9
         for i in range(self.num_variables):
+            # if the literal doesn't have covariance it doesn't matter
             if count_value[i][0]==0:
                 self.variables[i].covariance_matrix_statistics_true = min_value
             else:
