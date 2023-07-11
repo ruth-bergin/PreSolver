@@ -300,11 +300,12 @@ class CNF:
         return 0
 
     def handle_obsolete_variables(self):
-        org_len = len(self.obsolete_variables)
-        self.obsolete_variables = [variable for variable in self.variables
-                                   if (not variable.removed) and variable.appearances()==0]
+        new_obsolete_variables = [variable for variable in self.variables
+                                  if (not variable.removed) and variable.appearances()==0
+                                  and variable not in self.obsolete_variables]
+        self.obsolete_variables += new_obsolete_variables
         self.variables = [variable for variable in self.variables if not variable.removed and variable.appearances()>0]
-        return len(self.obsolete_variables)>org_len
+        return len(new_obsolete_variables)>0
 
     def check_for_sat_violation(self):
         if not self.sat and self.solve():
