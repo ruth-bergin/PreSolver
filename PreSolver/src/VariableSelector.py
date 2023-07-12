@@ -11,6 +11,10 @@ class VariableSelector:
                  selection_complexity = "complete", fn=""):
         self.cnf = CNF(cnf_string, sep=sep, verbose=verbose)
         self.solution = Solution(str(self.cnf), fn)
+        if use_dpll:
+            self.fn = fn.replace("processed","assignment_confidence_dpll")
+        else:
+            self.fn = fn.replace("processed","assignment_confidence_base")
         self.cutoff = cutoff
         self.verbose = verbose
         self.assignments = 0
@@ -30,9 +34,11 @@ class VariableSelector:
         first_pass = True
         branches_sat_probability, assignment = None, None
         i = 0
+        nvars = self.cnf.num_variables
         last_known_sat = str(self.cnf)
         if self.verbose:
             print("Running first pass")
+        branches_sat_diff=1
         while better_option_sat_probability > self.cutoff:
             if self.rfc.predict_sat(str(self.cnf)):
                 last_known_sat = str(self.cnf)
@@ -46,15 +52,24 @@ class VariableSelector:
                           .format(better_option_sat_probability, self.cutoff))
                 self.cnf.assign_literal_by_integer(branches_sat_probability[VARIABLE].index*assignment)
                 self.update_solution()
+                file = open(self.fn,"a+")
+                file.write(f"{self.assignments},{nvars-self.cnf.num_variables}"
+                           f",{round(better_option_sat_probability,2)},{branches_sat_diff},{self.cnf.solve()}\n")
+                file.close()
                 if to_failure:
                     if not self.cnf.solve():
                         return 0, self.cnf
                 self.assignments += 1
             else:
                 first_pass = False
+                file = open(self.fn,"w+")
+                file.write("assignments,literals.assigned,sat.confidence,diff.sat.con,sat"
+                           f"\n0,{nvars},1,1,True\n")
+                file.close()
             if not self.cnf.solve() and self.assignments_to_failure == 0:
                 self.assignments_to_failure = self.assignments
             branches_sat_probability = self.branch_cnf()
+            branches_sat_diff = round(abs(branches_sat_probability[TRUE]-branches_sat_probability[FALSE]),2)
             if self.solved:
                 if self.verbose or True:
                     print("Solved.")
@@ -73,7 +88,7 @@ class VariableSelector:
                     print("Both branches unsat. Terminating.")
                 self.update_solution()
                 return 3, CNF(last_known_sat)
-            if single_path:
+            if single_path: # or branches_sat_diff<0.15:
                 variable = branches_sat_probability[VARIABLE]
                 if variable.major_literal:
                     assignment=1

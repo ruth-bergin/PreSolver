@@ -47,9 +47,9 @@ class Variable:
             else:
                 return self.num_negations
         if assignment:
-            return self.num_affirmations #* (self.num_affirmations / self.appearances())
+            return self.num_affirmations * (self.num_affirmations / self.appearances())
         else:
-            return self.num_negations #* (self.num_negations / self.appearances())
+            return self.num_negations * (self.num_negations / self.appearances())
 
     def get_clause_mean_size(self, affirmation):
         if affirmation:

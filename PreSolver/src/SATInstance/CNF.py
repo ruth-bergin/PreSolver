@@ -37,6 +37,7 @@ class CNF:
             try:
                 description, first_clause = [line.strip() for line in line1.split("\n")]
             except Exception as e:
+                print([line.strip() for line in line1.split("\n")])
                 raise e
             lines = [line for line in [first_clause] + rest_of_text if line != ""]
         else:
@@ -46,6 +47,7 @@ class CNF:
         self.clauses = [Clause(i) for i in range(self.num_clauses)]
         for index, variables in enumerate(lines):
             if index >= self.num_clauses:
+                print(variables)
                 raise ValueError(f"Number of clauses {self.num_clauses} and number of lines {len(lines)} do not match.")
             clause = self.clauses[index]
             for i in variables.split():
