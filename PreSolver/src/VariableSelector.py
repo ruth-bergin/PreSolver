@@ -54,7 +54,8 @@ class VariableSelector:
                 self.update_solution()
                 file = open(self.fn,"a+")
                 file.write(f"{self.assignments},{nvars-self.cnf.num_variables}"
-                           f",{round(better_option_sat_probability,2)},{branches_sat_diff},{self.cnf.solve()}\n")
+                           f",{round(better_option_sat_probability,2)},{branches_sat_diff}"
+                           f",{self.cnf.num_clauses/self.cnf.num_variables},{self.cnf.solve()}\n")
                 file.close()
                 if to_failure:
                     if not self.cnf.solve():
@@ -63,8 +64,8 @@ class VariableSelector:
             else:
                 first_pass = False
                 file = open(self.fn,"w+")
-                file.write("assignments,literals.assigned,sat.confidence,diff.sat.con,sat"
-                           f"\n0,{nvars},1,1,True\n")
+                file.write("assignments,literals.assigned,sat.confidence,diff.sat.con,cv_ratio,sat"
+                           f"\n0,{nvars},1,1,{self.cnf.num_clauses/self.cnf.num_variables},True\n")
                 file.close()
             if not self.cnf.solve() and self.assignments_to_failure == 0:
                 self.assignments_to_failure = self.assignments
@@ -80,6 +81,7 @@ class VariableSelector:
                 self.cnf.assign_literal_by_integer(variable.index*assignment)
                 self.update_solution()
                 for variable in self.cnf.variables+self.cnf.obsolete_variables:
+                    variable.get_heuristic()
                     variable.post_solution=True
                     self.solution.add_assignment(variable, variable.major_literal, -5)
                 return 0, self.cnf
@@ -150,28 +152,7 @@ class VariableSelector:
         return self.rfc.predict_shadow_cnfs(cnf_branch_true, cnf_branch_false)
 
     def select_next_variable(self):
-        if self.selection_complexity=="complete":
-            return max(self.cnf.variables)
-        elif self.selection_complexity=="random":
-            return choice(self.cnf.variables)
-        elif self.selection_complexity=="appearances":
-            for literal in self.cnf.variables:
-                if literal.pure():
-                    return literal
-            best = max([abs(literal.num_affirmations-literal.num_negations) for literal in self.cnf.variables])
-            literal = [literal for literal in self.cnf.variables if abs(literal.num_affirmations - literal.num_negations) == best]
-            return literal[0]
-        elif self.selection_complexity=="importance":
-            for literal in self.cnf.variables:
-                if literal.pure():
-                    return literal
-            best = max([abs((literal.num_affirmations/min(literal.affirmations,default=1).size)
-                            -(literal.num_negations/min(literal.negations,default=1).size))
-                        for literal in self.cnf.variables])
-            literal = [literal for literal in self.cnf.variables if
-                       abs((literal.num_affirmations/min(literal.affirmations,default=1).size)
-                                -(literal.num_negations/min(literal.negations,default=1).size)) == best]
-            return literal[0]
+        return max(self.cnf.variables)
 
     def update_solution(self):
         new_assignments = self.cnf.assignments

@@ -21,6 +21,8 @@ class CNF:
         self.construct(cnf_string, sep)
         self.update_covariance_matrix()
         self.update_covariance_matrix_statistics()
+        if self.verbose:
+            print("Solving")
         self.sat = self.solve()
         if self.verbose:
             print(f"Propagating from __init__() with unary clauses {[clause.index for clause in self.unary_clauses]}")
@@ -37,7 +39,7 @@ class CNF:
             try:
                 description, first_clause = [line.strip() for line in line1.split("\n")]
             except Exception as e:
-                print([line.strip() for line in line1.split("\n")])
+                print([line for line in line1.split("  0 \n ")])
                 raise e
             lines = [line for line in [first_clause] + rest_of_text if line != ""]
         else:
@@ -315,8 +317,8 @@ class CNF:
 
     def __str__(self):
         self.rearrange()
-        if len(self.unary_clauses)>0 and not self.solved:
-            print(f"There shouldn't be unit clauses.\n{[str(clause) for clause in self.unary_clauses]}")
+        #if len(self.unary_clauses)>0 and not self.solved:
+        #    print(f"There shouldn't be unit clauses.\n{[str(clause) for clause in self.unary_clauses]}")
         if self.solved:
             return ""
         string = "p cnf {} {}\n".format(self.num_variables, self.num_clauses)

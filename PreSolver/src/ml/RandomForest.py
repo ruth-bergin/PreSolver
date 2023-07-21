@@ -4,6 +4,7 @@ from sklearn.metrics import accuracy_score, RocCurveDisplay, roc_curve, auc, con
 from sklearn.ensemble import RandomForestClassifier
 from ..SATfeatPy.sat_instance.sat_instance import *
 import matplotlib.pyplot as plt
+import numpy as np
 
 TRAIN, TEST = "train", "test"
 INTERMEDIARY_FILENAME = "../instances/intermediary/shadow_cnf_features.txt"
@@ -13,7 +14,7 @@ class SAT_RFC:
     def __init__(self, dataset="cbs_dpll_50.txt", dpll=True):
         self.filename = "..\\instances\\rfc\\" + dataset
         self.model = RandomForestClassifier(n_estimators=250, max_depth=8)
-        self.data = pd.read_csv(self.filename, header=0).drop("filename", axis=1)
+        self.data = pd.read_csv(self.filename, header=0).drop(["filename"], axis=1)
         self.dpll=dpll
 
         # Split predictors and label
@@ -40,6 +41,19 @@ class SAT_RFC:
 
         display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
         display.plot()
+        plt.show()
+
+    def feature_importance(self):
+        importances = self.model.feature_importances_
+
+        forest_importances = pd.Series(importances, index=self.data.drop("sat",axis=1).columns)
+        std = np.std([tree.feature_importances_ for tree in self.model.estimators_], axis=0)
+
+        fig, ax = plt.subplots()
+        forest_importances.plot.bar(yerr=std, ax=ax)
+        ax.set_title("Feature importances using MDI")
+        ax.set_ylabel("Mean decrease in impurity")
+        fig.tight_layout()
         plt.show()
 
     def predict_shadow_cnfs(self, branch_true, branch_false):
@@ -73,6 +87,7 @@ class SAT_RFC:
             if self.dpll:
                 feats.gen_dpll_probing_features()
             info += ",".join([str(feats.features_dict[key]) for key in feats.features_dict.keys()])
+                              #if key not in ["v","c"]])
 
         shadow_cnf_features = open(INTERMEDIARY_FILENAME, "w")
         shadow_cnf_features.write(info)

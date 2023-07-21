@@ -9,13 +9,17 @@ class DatasetPopulator:
         self.filename = filename
         self.cnf = cnf
 
-    def populate(self, random=False):
-        print(f"Random: {random}")
+    def populate(self, random_after=1000):
+        print(f"Random: {random_after}")
+        unsat = not self.cnf.solve()
         string = ""
         i = 0
         prev_cnf = None
         # Condition: prevent infinite loop of aborted variable assignments
         while (str(prev_cnf)!=str(self.cnf)):
+            print(f"nvar: {self.cnf.num_variables}")
+            if 100-self.cnf.num_variables>=random_after:
+                unsat = True
             prev_cnf = self.cnf
             # Choose a random variable
             variable = randint(1, self.cnf.num_variables)
@@ -25,7 +29,7 @@ class DatasetPopulator:
             for j in [True, False]:
                 name, shadow_cnf = self.write_and_solve_shadow_cnf(variable, self.convert_to_int(j))
                 if shadow_cnf.solved:
-                    print("###Solved.###")
+                    print(f"###Solved: {shadow_cnf.num_variables}###")
                     return string
                 # if the assignment was aborted it must be unsat
                 if str(shadow_cnf)==str(self.cnf):
@@ -33,19 +37,21 @@ class DatasetPopulator:
                 else:
                     sat = shadow_cnf.solve()
                 if sat:
-                    valid.append((shadow_cnf, j))
+                    valid.append((shadow_cnf, j, sat))
                 # ignore the sat-only criterion if randomised
-                elif random:
-                    valid.append((shadow_cnf, j))
+                elif unsat:
+                    valid.append((shadow_cnf, j, sat))
                 row = f"{name},{sat}\n"
                 string += row
             if len(valid)<1:
                 raise ValueError(f"Neither branch is SAT, despite the requirement.")
             assignment = choice(valid)
+            if unsat and False in [i[2] for i in valid]:
+                assignment = choice([option for option in valid if not option[2]])
             self.cnf = assignment[0]
             i += 1
         if str(self.cnf)==str(prev_cnf):
-            print("***No further change viable.***")
+            print(f"***No further change viable: {self.cnf.num_variables}***")
         return string
 
     def write_and_solve_shadow_cnf(self, variable, assignment):

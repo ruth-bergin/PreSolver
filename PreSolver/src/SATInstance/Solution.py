@@ -29,7 +29,7 @@ class Solution:
         self.cnf = [[literal]] + self.cnf
 
         if self.save_to_file:
-            filename = f"{self.filename[:-4]}_dlisCovariance_p{len(self.assignments)}_x{literal}_s{reason}.cnf"
+            filename = f"{self.filename[:-4]}_strictDlisTieBreakPurity_p{len(self.assignments)}_x{literal}_s{reason}.cnf"
             file = open(filename, "w+")
             file.write(str(self))
             file.close()

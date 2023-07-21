@@ -21,6 +21,9 @@ class Variable:
         self.covariance_matrix_statistic_false = 0
         self.instance_num_clauses = 0
         self.reason_for_assignment = 0
+        self.unit = False
+        self.obsolete = False
+        self.post_solution = False
 
     def get_heuristic(self, verbose=False):
         if self.pure():
@@ -28,14 +31,13 @@ class Variable:
                 print(f"Pure literal {self.major_literal}, returning number of appearances")
             return self.appearances()
         self.calculate_clause_summary_statistics()
-        affirmation_metric = self.get_metric(True)*self.covariance_matrix_statistic_true
-        negation_metric = self.get_metric(False)*self.covariance_matrix_statistic_false
+        affirmation_metric = self.get_metric(True) #*self.covariance_matrix_statistic_true
+        negation_metric = self.get_metric(False) #*self.covariance_matrix_statistic_false
         if affirmation_metric>negation_metric:
             self.set_major_literal(True)
-            return affirmation_metric
         else:
             self.set_major_literal(False)
-            return negation_metric
+        return max([affirmation_metric, negation_metric])
 
     def set_major_literal(self, assignment):
         self.major_literal = assignment
@@ -47,9 +49,9 @@ class Variable:
             else:
                 return self.num_negations
         if assignment:
-            return self.num_affirmations * (self.num_affirmations / self.appearances())
+            return self.num_affirmations #* (self.num_affirmations / self.appearances())
         else:
-            return self.num_negations * (self.num_negations / self.appearances())
+            return self.num_negations #* (self.num_negations / self.appearances())
 
     def get_clause_mean_size(self, affirmation):
         if affirmation:
@@ -74,9 +76,8 @@ class Variable:
 
     def calculate_clause_summary_statistics(self):
         self.affirmation_statistics[CLAUSE_SUMMARY_STATS], self.negation_statistics[CLAUSE_SUMMARY_STATS] = {}, {}
-        if not self.pure():
-            self.get_clause_stats(True)
-            self.get_clause_stats(False)
+        self.get_clause_stats(True)
+        self.get_clause_stats(False)
 
     def get_clause_stats(self, affirmation):
         clause_stats = self.negation_statistics[CLAUSE_SUMMARY_STATS]
@@ -109,6 +110,10 @@ class Variable:
     def appearances(self):
         return self.num_negations + self.num_affirmations
 
+    def purity(self):
+        major_literal = max([self.num_negations, self.num_affirmations])
+        return major_literal/self.appearances()
+
     def score(self):
         if self.unit:
             return -2
@@ -124,16 +129,26 @@ class Variable:
     def __gt__(self, other):
         if self.pure() and not other.pure():
             return True
-        elif other.pure() and self.pure():
-            return self.appearances()>other.appearances()
-        return self.get_heuristic() > other.get_heuristic()
+        if (not self.pure()) and other.pure():
+            return False
+        diff = self.get_heuristic() - other.get_heuristic()
+        if diff==0:
+            if self.pure() and other.pure():
+                return self.get_clause_min_size(self.major_literal) < other.get_clause_min_size(other.major_literal)
+            return self.purity() > other.purity()
+        return diff > 0
 
     def __lt__(self, other):
         if (not self.pure()) and other.pure():
             return True
-        if self.pure() and other.pure():
-            return self.appearances()<other.appearances()
-        return self.get_heuristic() < other.get_heuristic()
+        if self.pure() and not other.pure():
+            return False
+        diff = self.get_heuristic() - other.get_heuristic()
+        if diff==0:
+            if self.pure() and other.pure():
+                return self.get_clause_min_size(self.major_literal) > other.get_clause_min_size(other.major_literal)
+            return self.purity() > other.purity()
+        return diff < 0
 
     def __str__(self):
         return "{} {} {}\n{}".format(
