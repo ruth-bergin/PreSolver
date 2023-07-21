@@ -133,7 +133,7 @@ class Variable:
             return False
         diff = self.get_heuristic() - other.get_heuristic()
         if diff==0:
-            if self.pure() and other.pure():
+            if self.purity()==other.purity():
                 return self.get_clause_min_size(self.major_literal) < other.get_clause_min_size(other.major_literal)
             return self.purity() > other.purity()
         return diff > 0

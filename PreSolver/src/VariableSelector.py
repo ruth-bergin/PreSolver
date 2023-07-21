@@ -23,7 +23,7 @@ class VariableSelector:
         self.selection_complexity = selection_complexity
         if self.verbose:
             print("Training RFC.")
-        self.rfc = SAT_RFC(dataset=dataset,dpll=use_dpll)
+        self.classifier = SAT_RFC(dataset=dataset, dpll=use_dpll)
         if self.verbose:
             print("Model training complete.")
         self.solved = False
@@ -40,7 +40,7 @@ class VariableSelector:
             print("Running first pass")
         branches_sat_diff=1
         while better_option_sat_probability > self.cutoff:
-            if self.rfc.predict_sat(str(self.cnf)):
+            if self.classifier.predict_sat(str(self.cnf)):
                 last_known_sat = str(self.cnf)
             i += 1
             if self.verbose:
@@ -149,7 +149,7 @@ class VariableSelector:
             return shadow_cnf
 
     def get_sat_probability(self, cnf_branch_true, cnf_branch_false):
-        return self.rfc.predict_shadow_cnfs(cnf_branch_true, cnf_branch_false)
+        return self.classifier.predict_shadow_cnfs(cnf_branch_true, cnf_branch_false)
 
     def select_next_variable(self):
         return max(self.cnf.variables)

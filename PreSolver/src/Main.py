@@ -100,7 +100,7 @@ def experiment(folder_list, single_path=False):
             #    print("Unsat, skipping.")
             #    continue
 
-            file = open(path+"processed/"+filename[:-4]+"_strictDlisTieBreakPurity_p0.cnf", "w")
+            file = open(path+"processed/"+filename[:-4]+"_dlisTieBreakPurity_p0.cnf", "w")
             file.write(cnf_string)
             file.close()
 
