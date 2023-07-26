@@ -50,6 +50,12 @@ class Solution:
             sign = 1
         return variable.org_index*sign
 
+    def as_assignment(self, binary=True):
+        assignment = sorted([self.get_var_as_int(v, a) for v,a in self.assignments], key=abs)
+        if binary:
+            return [1 if i>0 else 0 for i in assignment]
+        return assignment
+
     def __str__(self):
         num_clauses = len(self.cnf)
         string = f"p cnf {self.num_variables} {num_clauses}\n"
