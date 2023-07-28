@@ -8,8 +8,8 @@ VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", 
 class VariableSelector:
 
     def __init__(self, cnf_string, cutoff=0.6, verbose=False, sep=" 0\n", use_dpll=True,dataset="cbs_dpll_50.txt",
-                 selection_complexity = "complete", fn=""):
-        self.cnf = CNF(cnf_string, sep=sep, verbose=verbose)
+                 selection_complexity = "complete", fn="", ignore_conflicts = True):
+        self.cnf = CNF(cnf_string, sep=sep, verbose=verbose, ignore_conflicts=ignore_conflicts)
         self.solution = Solution(str(self.cnf), fn)
         if use_dpll:
             self.fn = fn.replace("processed","assignment_confidence_dpll")
@@ -71,6 +71,8 @@ class VariableSelector:
                 self.assignments_to_failure = self.assignments
             branches_sat_probability = self.branch_cnf()
             branches_sat_diff = round(abs(branches_sat_probability[TRUE]-branches_sat_probability[FALSE]),2)
+            # If ignoring conflicts:
+            # "solved" means complete assignment found with no guarantee of validity
             if self.solved:
                 if self.verbose or True:
                     print("Solved.")
@@ -132,7 +134,7 @@ class VariableSelector:
     def create_branch(self, variable, assignment):
         if self.verbose:
             print(f"Beginning shadow branch for variable {variable} assignment {assignment>0}")
-        shadow_cnf = CNF(str(self.cnf))
+        shadow_cnf = CNF(str(self.cnf), ignore_conflicts=self.cnf.ignore_conflicts)
         success = shadow_cnf.assign_literal_by_integer(variable*assignment)
         if success<0:
             if self.verbose:

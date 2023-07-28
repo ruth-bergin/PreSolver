@@ -83,13 +83,12 @@ def experiment(folder_list, single_path=False):
         solved = 0
         sat = 0
         assignments_to_failure = []
-        for file in listdir(path+"processed/"):
-            os.remove(f"{path}processed/{file}")
-        print("processed cleared")
-        for file in listdir(path+"assignment_confidence_base/"):
-            os.remove(f"{path}assignment_confidence_base/{file}")
-        print("assignment confidence base cleared")
-        for index, filename in enumerate(listdir(path)):
+        folders_to_clear = ["processed","assignment_confidence_dpll","assignment_confidence_base","solutions"]
+        for f in folders_to_clear:
+            for file in listdir(f"{path}{f}"):
+                os.remove(f"{path}{f}/{file}")
+            print(f"{f} cleared")
+        for index, filename in enumerate(listdir(path)[600:620]):
             if filename[-4:]!=".cnf":
                 continue
             file = open(path+filename, "r")
@@ -105,16 +104,24 @@ def experiment(folder_list, single_path=False):
             file.close()
 
             try:
-                selector = VariableSelector(cnf_string, sep="  0 \n ", cutoff=-1, use_dpll=False, dataset="cbs_base.txt",
-                                            fn=path+"processed/"+filename, verbose=False)
-            except:
                 selector = VariableSelector(cnf_string, cutoff=-1, use_dpll=False, dataset="cbs_base.txt",
-                                            fn=path+"processed/"+filename, verbose=False)
+                                            fn=path+"processed/"+filename, verbose=True, ignore_conflicts=True)
+            except:
+                selector = VariableSelector(cnf_string, sep="  0 \n ", cutoff=-1, use_dpll=False, dataset="cbs_base.txt",
+                                            fn=path+"processed/"+filename, verbose=False, ignore_conflicts=True)
 
             selector.run(single_path=single_path)
+            solution = selector.solution.as_assignment(True)
+            if len(solution)!=100:
+                raise ValueError(f"Length of solution is {len(solution)} when it should be 100"
+                                 f"{selector.solution}")
+            output = open(f"{path}/solutions/{filename[:-4]}.txt", "w")
+            output.write(solution)
+            output.close()
 
             if selector.solved:
                 solved += 1
+                selector.solution.as_assignment()
             if selector.cnf.solve():
                 sat += 1
             assignments_to_failure.append(selector.assignments_to_failure)
@@ -123,5 +130,5 @@ def experiment(folder_list, single_path=False):
         print(f"SOLVED:\t{solved}\nSAT:\t{sat}")
         print(assignments_to_failure)
 
-experiment([f"andrea/iscas/iscas{i}" for i in []]+["andrea/DatasetB"], single_path=True)
+experiment(["cbs"], single_path=False)
 

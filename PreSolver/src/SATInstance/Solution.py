@@ -53,8 +53,8 @@ class Solution:
     def as_assignment(self, binary=True):
         assignment = sorted([self.get_var_as_int(v, a) for v,a in self.assignments], key=abs)
         if binary:
-            return [1 if i>0 else 0 for i in assignment]
-        return assignment
+            return "".join(["1" if i>0 else "0" for i in assignment])
+        return "".join([str(i) for i in assignment])
 
     def __str__(self):
         num_clauses = len(self.cnf)

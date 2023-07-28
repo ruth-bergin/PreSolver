@@ -7,7 +7,7 @@ import numpy as np
 
 class CNF:
 
-    def __init__(self, cnf_string, sep=" 0\n", verbose=False):
+    def __init__(self, cnf_string, sep=" 0\n", verbose=False, ignore_conflicts=False):
         self.solved = False
         self.verbose = verbose
         self.num_clauses = 0
@@ -18,6 +18,7 @@ class CNF:
         self.obsolete_variables = []
         self.assignments = []
         self.temp_assignments = []
+        self.ignore_conflicts = ignore_conflicts
         self.construct(cnf_string, sep)
         self.update_covariance_matrix()
         self.update_covariance_matrix_statistics()
@@ -90,10 +91,17 @@ class CNF:
 
     def assign_variable(self, variable, assignment, reason):
         variable.reason_for_assignment = reason
-        if (variable, self.get_sign_from_bool(not assignment)) in [clause.literals[0] for clause in self.unary_clauses]:
-            if self.verbose:
-                print("Contradictory unit clauses. Aborting.")
-            return -1
+        for clause in self.unary_clauses:
+            if (variable, self.get_sign_from_bool(not assignment))==clause.literals[0]:
+                if self.ignore_conflicts:
+                    self.sat = False
+                    if self.verbose:
+                        print(f"Ignoring conflict of var {variable.index}; original index {variable.org_index}")
+                    self.remove_clause(clause)
+                else:
+                    if self.verbose:
+                        print("Contradictory unit clauses. Aborting.")
+                    return -1
         if variable.removed:
             raise ValueError(f"Attempting to assign {variable.index} when it has already been assigned.")
         if self.solved:
@@ -202,7 +210,8 @@ class CNF:
             print(f"Completed run of assignment of {integer} with success {success}")
             print(f"Satisfiability: {self.solve()}")
         self.check_for_literal_clause_inconsistency()
-        self.check_for_sat_violation()
+        if not self.ignore_conflicts:
+            self.check_for_sat_violation()
         if not self.solved:
             self.update_covariance_matrix()
             self.update_covariance_matrix_statistics()
