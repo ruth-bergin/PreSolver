@@ -78,6 +78,7 @@ def populate_dataset(folder, n=50, step=1):
 #extract("../instances/population/","cbs_base",True, feature_set="base")
 def experiment(folder_list, single_path=False):
     classifier = SAT_RFC(dataset="cbs_base.txt", dpll=False)
+    output_folder = "rfc_base_predictions"
     for folder in folder_list:
         print(f"On folder {folder}")
         path = f"../instances/{folder}/"
@@ -85,11 +86,15 @@ def experiment(folder_list, single_path=False):
         solved = 0
         sat = 0
         assignments_to_failure = []
-        folders_to_clear = ["processed","assignment_confidence_dpll","assignment_confidence_base","solutions"]
+        folders_to_clear = ["processed","assignment_confidence_dpll","assignment_confidence_base","solutions",
+                            output_folder]
         for f in folders_to_clear:
-            for file in listdir(f"{path}{f}"):
-                os.remove(f"{path}{f}/{file}")
-            print(f"{f} cleared")
+            if os.path.isdir(f"{path}{f}"):
+                for file in listdir(f"{path}{f}"):
+                    os.remove(f"{path}{f}/{file}")
+                print(f"{f} cleared")
+            else:
+                os.mkdir(f"{path}{f}")
         for index, filename in enumerate(listdir(path)[600:620]):
             if filename[-4:]!=".cnf":
                 continue
@@ -117,7 +122,7 @@ def experiment(folder_list, single_path=False):
             if len(solution)!=100:
                 raise ValueError(f"Length of solution is {len(solution)} when it should be 100"
                                  f"{selector.solution}")
-            output = open(f"{path}/solutions/{filename[:-4]}.txt", "w")
+            output = open(f"{path}/{output_folder}/{filename[:-4]}.txt", "w")
             output.write(solution)
             output.close()
 
