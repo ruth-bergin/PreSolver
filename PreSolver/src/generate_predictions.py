@@ -24,8 +24,9 @@ def main(classifier_selection, training_set, folder):
         if os.path.isdir(f"{path}{f}"):
             for file in listdir(f"{path}{f}"):
                 os.remove(f"{path}{f}/{file}")
-            print(f"{f} cleared")
+            print(f"{path}{f} cleared")
         else:
+            print(f"Making directory {path}{f}")
             os.mkdir(f"{path}{f}")
     for index, filename in enumerate(listdir(path)):
         if filename[-4:]!=".cnf":

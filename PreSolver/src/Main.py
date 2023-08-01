@@ -1,11 +1,8 @@
 import os
 from random import randint,choice
 
-from VariableSelector import VariableSelector
 from SATInstance.CNF import CNF
 from ml.DatasetPopulator import DatasetPopulator
-from ml.RandomForest import SAT_RFC
-from ml.FeatureExtractor import extract
 from os import listdir
 import wget
 import lzma
