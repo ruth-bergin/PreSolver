@@ -4,6 +4,7 @@ from random import randint,choice
 from VariableSelector import VariableSelector
 from SATInstance.CNF import CNF
 from ml.DatasetPopulator import DatasetPopulator
+from ml.RandomForest import SAT_RFC
 from ml.FeatureExtractor import extract
 from os import listdir
 import wget
@@ -76,6 +77,7 @@ def populate_dataset(folder, n=50, step=1):
 #populate_dataset("cbs", 80)
 #extract("../instances/population/","cbs_base",True, feature_set="base")
 def experiment(folder_list, single_path=False):
+    classifier = SAT_RFC(dataset="cbs_base.txt", dpll=False)
     for folder in folder_list:
         print(f"On folder {folder}")
         path = f"../instances/{folder}/"
@@ -104,10 +106,10 @@ def experiment(folder_list, single_path=False):
             file.close()
 
             try:
-                selector = VariableSelector(cnf_string, cutoff=-1, use_dpll=False, dataset="cbs_base.txt",
+                selector = VariableSelector(cnf_string, classifier, cutoff=-1, use_dpll=False,
                                             fn=path+"processed/"+filename, verbose=True, ignore_conflicts=True)
             except:
-                selector = VariableSelector(cnf_string, sep="  0 \n ", cutoff=-1, use_dpll=False, dataset="cbs_base.txt",
+                selector = VariableSelector(cnf_string, classifier, sep="  0 \n ", cutoff=-1, use_dpll=False,
                                             fn=path+"processed/"+filename, verbose=False, ignore_conflicts=True)
 
             selector.run(single_path=single_path)
@@ -119,7 +121,7 @@ def experiment(folder_list, single_path=False):
             output.write(solution)
             output.close()
 
-            if selector.solved:
+            if selector.assignment_complete:
                 solved += 1
                 selector.solution.as_assignment()
             if selector.cnf.solve():

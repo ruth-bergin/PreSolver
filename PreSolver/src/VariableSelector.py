@@ -7,7 +7,7 @@ VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", 
 
 class VariableSelector:
 
-    def __init__(self, cnf_string, cutoff=0.6, verbose=False, sep=" 0\n", use_dpll=True,dataset="cbs_dpll_50.txt",
+    def __init__(self, cnf_string, classifier, cutoff=0.6, verbose=False, sep=" 0\n", use_dpll=True,
                  selection_complexity = "complete", fn="", ignore_conflicts = True):
         self.cnf = CNF(cnf_string, sep=sep, verbose=verbose, ignore_conflicts=ignore_conflicts)
         self.solution = Solution(str(self.cnf), fn)
@@ -21,13 +21,8 @@ class VariableSelector:
         self.p = 0
         self.assignments_to_failure = 0
         self.selection_complexity = selection_complexity
-        if self.verbose:
-            print("Training RFC.")
-        self.classifier = SAT_RFC(dataset=dataset, dpll=use_dpll)
-        if self.verbose:
-            print("Model training complete.")
-        self.solved = False
-        self.dataset=dataset
+        self.classifier = classifier
+        self.assignment_complete = False
 
     def run(self, to_failure=False, single_path=False):
         better_option_sat_probability = self.cutoff + 0.1
@@ -40,8 +35,6 @@ class VariableSelector:
             print("Running first pass")
         branches_sat_diff=1
         while better_option_sat_probability > self.cutoff:
-            if self.classifier.predict_sat(str(self.cnf)):
-                last_known_sat = str(self.cnf)
             i += 1
             if self.verbose:
                 print(f"CNF currently has {self.cnf.num_variables} literals "
@@ -73,7 +66,7 @@ class VariableSelector:
             branches_sat_diff = round(abs(branches_sat_probability[TRUE]-branches_sat_probability[FALSE]),2)
             # If ignoring conflicts:
             # "solved" means complete assignment found with no guarantee of validity
-            if self.solved:
+            if self.assignment_complete:
                 if self.verbose or True:
                     print("Solved.")
                 variable = branches_sat_probability[VARIABLE]
@@ -141,7 +134,7 @@ class VariableSelector:
                 print(f"Ending shadow branch for variable {variable} assignment {assignment>0} - non-viable")
             return self.cnf
         if shadow_cnf.num_clauses<2:
-            self.solved = True
+            self.assignment_complete = True
             if self.verbose:
                 print(f"Ending shadow branch for variable {variable} assignment {assignment>0} - solved")
             return self.cnf
@@ -151,7 +144,14 @@ class VariableSelector:
             return shadow_cnf
 
     def get_sat_probability(self, cnf_branch_true, cnf_branch_false):
-        return self.classifier.predict_shadow_cnfs(cnf_branch_true, cnf_branch_false)
+        for cnf_string, assignment in [(cnf_branch_true, True), (cnf_branch_false, False)]:
+            filename = open(f"../instances/intermediary/shadow_cnf_{assignment}.txt", "w")
+            filename.write(cnf_string)
+            filename.close()
+        return {
+            TRUE: self.classifier.predict_sat("../instances/intermediary/shadow_cnf_True.txt"),
+            FALSE: self.classifier.predict_sat("../instances/intermediary/shadow_cnf_True.txt")
+        }
 
     def select_next_variable(self):
         return max(self.cnf.variables)

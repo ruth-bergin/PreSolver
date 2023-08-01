@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, RocCurveDisplay, roc_curve, auc, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
-from ..SATfeatPy.sat_instance.sat_instance import *
+from src.SATfeatPy.sat_instance.sat_instance import *
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -56,13 +56,8 @@ class SAT_RFC:
         fig.tight_layout()
         plt.show()
 
-    def predict_shadow_cnfs(self, branch_true, branch_false):
-        for cnf_string, assignment in [(branch_true, True), (branch_false, False)]:
-            filename = open(f"../instances/intermediary/shadow_cnf_{assignment}.txt", "w")
-            filename.write(cnf_string)
-            filename.close()
-        self.write_satfeatpy_features_to_file(["../instances/intermediary/shadow_cnf_True.txt",
-                                              "../instances/intermediary/shadow_cnf_False.txt"])
+    def predict_shadow_cnfs(self, shadow_cnf_filenames):
+        self.write_satfeatpy_features_to_file(shadow_cnf_filenames)
         test_data = pd.read_csv(INTERMEDIARY_FILENAME, header=0)
         predictions = self.model.predict_proba(test_data)
         return {
@@ -70,13 +65,11 @@ class SAT_RFC:
             "false":predictions[1][1]
         }
 
-    def predict_sat(self, cnf_string):
-        filename = open("../instances/intermediary/shadow_cnf_dominant.txt", "w")
-        filename.write(cnf_string)
-        filename.close()
-        self.write_satfeatpy_features_to_file(["../instances/intermediary/shadow_cnf_dominant.txt"])
-        test_data = pd.read_csv(INTERMEDIARY_FILENAME, header=0)
-        return self.model.predict(test_data)
+    def predict_sat(self, cnf_filename):
+        self.write_satfeatpy_features_to_file([cnf_filename])
+        features = pd.read_csv(INTERMEDIARY_FILENAME, header=0)
+        predictions = self.model.predict_proba(features)
+        return predictions[0][1]
 
     def write_satfeatpy_features_to_file(self, filename_list):
         info = ",".join(list(self.data.drop("sat", axis=1).columns.values))
