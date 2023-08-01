@@ -28,12 +28,6 @@ class Solution:
     def add_unit_clause(self, literal, reason=0):
         self.cnf = [[literal]] + self.cnf
 
-        if self.save_to_file:
-            filename = f"{self.filename[:-4]}_dlisTieBreakPurity_p{len(self.assignments)}_x{literal}_s{reason}.cnf"
-            file = open(filename, "w+")
-            file.write(str(self))
-            file.close()
-
     def handle_clause_removal_and_reduction(self, literal):
         i = len(self.cnf)
         while i >=0:
