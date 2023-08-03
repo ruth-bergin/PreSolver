@@ -1,5 +1,5 @@
-from src.SATInstance.CNF import CNF
-from src.SATInstance.Solution import Solution
+from SATInstance.CNF import CNF
+from SATInstance.Solution import Solution
 
 VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", "branch_t", "branch_f"
 
@@ -130,12 +130,12 @@ class VariableSelector:
 
     def get_sat_probability(self, cnf_branch_true, cnf_branch_false):
         for cnf_string, assignment in [(cnf_branch_true, True), (cnf_branch_false, False)]:
-            filename = open(f"../instances/intermediary/shadow_cnf_{assignment}.txt", "w")
+            filename = open(f"PreSolver/instances/intermediary/shadow_cnf_{assignment}.txt", "w")
             filename.write(cnf_string)
             filename.close()
         return {
-            TRUE: self.classifier.predict_sat("../instances/intermediary/shadow_cnf_True.txt"),
-            FALSE: self.classifier.predict_sat("../instances/intermediary/shadow_cnf_True.txt")
+            TRUE: self.classifier.predict_sat("PreSolver/instances/intermediary/shadow_cnf_True.txt"),
+            FALSE: self.classifier.predict_sat("PreSolver/instances/intermediary/shadow_cnf_True.txt")
         }
 
     def select_next_variable(self):

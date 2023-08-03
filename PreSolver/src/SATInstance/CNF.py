@@ -1,7 +1,7 @@
 from pysat.solvers import Solver
 
-from src.SATInstance.Clause import Clause
-from src.SATInstance.Variable import Variable
+from SATInstance.Clause import Clause
+from SATInstance.Variable import Variable
 import numpy as np
 
 

@@ -7,16 +7,16 @@ from ml.RandomForest import SAT_RFC
 from os import listdir
 
 def train_classifier(classifier, training_set):
-    if classifier=="rfc_base":
+    if classifier=="rfcBase":
         return SAT_RFC(training_set, dpll=False)
-    elif classifier=="rfc_dpll":
+    elif classifier=="rfcDpll":
         return SAT_RFC(training_set, dpll=True)
     else:
         raise ValueError("Unrecognised classifier")
 def main(classifier_selection, training_set, folder):
     classifier = train_classifier(classifier_selection, training_set)
     output_folder = f"{classifier_selection}_predictions"
-    path = f"../instances/{folder}/"
+    path = f"PreSolver/instances/{folder}/"
 
     print("Cleaning up folders")
     folders_to_clear = [output_folder]

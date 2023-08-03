@@ -619,8 +619,10 @@ void initExp() {
 void parseParameters(int argc, char *argv[]) {
 	//define the argument parser
 	static struct option long_options[] =
-			{ { "fct", required_argument, 0, 'f' }, { "caching", required_argument, 0, 'c' }, { "eps", required_argument, 0, 'e' }, { "cb", required_argument, 0, 'b' }, { "runs", required_argument, 0, 't' }, { "maxflips", required_argument, 0, 'm' }, { "printSolution", no_argument, 0, 'a' },
-			 { "initialisation", required_argument, 0, 'i' }, { "help", no_argument, 0, 'h' }, { 0, 0, 0, 0 } };
+			{ { "fct", required_argument, 0, 'f' }, { "caching", required_argument, 0, 'c' }, { "eps", required_argument, 0, 'e' },
+			{ "cb", required_argument, 0, 'b' }, { "runs", required_argument, 0, 't' }, { "maxflips", required_argument, 0, 'm' },
+			{ "printSolution", no_argument, 0, 'a' }, { "initialisation", required_argument, 0, 'i' },
+			{ "help", no_argument, 0, 'h' }, {"initRandomisation", required_argument, 0, 'r'}, { 0, 0, 0, 0 } };
 
 	while (optind < argc) {
 		int index = -1;
@@ -664,6 +666,9 @@ void parseParameters(int argc, char *argv[]) {
 		case 'i': //take input from pre-solver
 		    customInit = 1;
 		    initFileName = optarg;
+		    break;
+		case 'r': // custom randomisation parameter
+		    initProb = 1 - atoi(optarg);
 		    break;
 		case 0: /* all parameter that do not */
 			/* appear in the opt string */

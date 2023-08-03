@@ -2,17 +2,17 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, RocCurveDisplay, roc_curve, auc, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
-from src.SATfeatPy.sat_instance.sat_instance import *
+from SATfeatPy.sat_instance.sat_instance import *
 import matplotlib.pyplot as plt
 import numpy as np
 
 TRAIN, TEST = "train", "test"
-INTERMEDIARY_FILENAME = "../instances/intermediary/shadow_cnf_features.txt"
+INTERMEDIARY_FILENAME = "PreSolver/instances/intermediary/shadow_cnf_features.txt"
 
 class SAT_RFC:
 
     def __init__(self, dataset="cbs_dpll_50.txt", dpll=True):
-        self.filename = "..\\instances\\rfc\\" + dataset
+        self.filename = "PreSolver/instances/rfc/" + dataset
         self.model = RandomForestClassifier(n_estimators=250, max_depth=8)
         self.data = pd.read_csv(self.filename, header=0).drop(["filename"], axis=1)
         self.dpll=dpll
