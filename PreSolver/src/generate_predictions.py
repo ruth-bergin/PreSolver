@@ -7,9 +7,9 @@ from ml.RandomForest import SAT_RFC
 from os import listdir
 
 def train_classifier(classifier, training_set):
-    if classifier=="rfc_base":
+    if classifier=="rfcBase":
         return SAT_RFC(training_set, dpll=False)
-    elif classifier=="rfc_dpll":
+    elif classifier=="rfcDpll":
         return SAT_RFC(training_set, dpll=True)
     else:
         raise ValueError("Unrecognised classifier")
