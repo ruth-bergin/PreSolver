@@ -7,9 +7,10 @@ import numpy as np
 
 class CNF:
 
-    def __init__(self, cnf_string, sep=" 0\n", verbose=False, ignore_conflicts=False):
+    def __init__(self, cnf_string, metric="dlis", sep=" 0\n", verbose=False, ignore_conflicts=False):
         self.solved = False
         self.verbose = verbose
+        self.metric = metric
         self.num_clauses = 0
         self.num_variables = 0
         self.clauses = []
@@ -46,7 +47,7 @@ class CNF:
         else:
             description, lines = line1, rest_of_text
         self.num_variables, self.num_clauses = int(description.split()[-2]), int(description.split()[-1])
-        self.variables = [Variable(i) for i in range(1, self.num_variables + 1)]
+        self.variables = [Variable(i, self.metric) for i in range(1, self.num_variables + 1)]
         self.clauses = [Clause(i) for i in range(self.num_clauses)]
         for index, variables in enumerate(lines):
             if index >= self.num_clauses:

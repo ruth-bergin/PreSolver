@@ -5,9 +5,10 @@ VARIABLE, TRUE, FALSE, BRANCH_TRUE, BRANCH_FALSE = "variable", "true", "false", 
 
 class VariableSelector:
 
-    def __init__(self, cnf, classifier, cutoff=0.6, verbose=False,
+    def __init__(self, cnf, classifier, metric, cutoff=0.6, verbose=False,
                  selection_complexity = "complete", fn=""):
         self.cnf = cnf
+        self.metric = metric
         self.solution = Solution(str(self.cnf), fn)
         self.cutoff = cutoff
         self.verbose = verbose
@@ -62,7 +63,6 @@ class VariableSelector:
                 self.update_solution()
                 for variable in self.cnf.variables+self.cnf.obsolete_variables:
                     variable.get_heuristic()
-                    variable.post_solution=True
                     self.solution.add_assignment(variable, variable.major_literal, -5)
                 return 0, self.cnf
             elif branches_sat_probability[TRUE]==0 and branches_sat_probability[FALSE]==0:
@@ -112,7 +112,7 @@ class VariableSelector:
     def create_branch(self, variable, assignment):
         if self.verbose:
             print(f"Beginning shadow branch for variable {variable} assignment {assignment>0}")
-        shadow_cnf = CNF(str(self.cnf), ignore_conflicts=self.cnf.ignore_conflicts)
+        shadow_cnf = CNF(str(self.cnf), metric=self.metric, ignore_conflicts=self.cnf.ignore_conflicts)
         success = shadow_cnf.assign_literal_by_integer(variable*assignment)
         if success<0:
             if self.verbose:
