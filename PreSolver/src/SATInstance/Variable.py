@@ -3,10 +3,34 @@ import numpy as np
 CLAUSE_SUMMARY_STATS, CLAUSE_MIN_SIZE, CLAUSE_MAX_SIZE = "clause summary stats", "clause min size", "clause max size"
 CLAUSE_MEDIAN_SIZE, CLAUSE_MEAN_SIZE, CLAUSE_STD_SIZE = "clause median size", "clause mean size", "clause std size"
 COVARIANCE_MATRIX_STATISTIC = "covariance matrix statistic"
+DLIS, RELATIVE_APPEARANCES, WEIGHTED_PURITY = "dlis", "relative_appearances", "weighted_purity"
 
 class Variable:
 
-    def __init__(self, index):
+    def dlis(self, assignment):
+        if assignment:
+            return self.num_affirmations
+        else:
+            return self.num_negations
+
+    def relative_appearances(self, assignment):
+        positive_purity = self.num_affirmations/self.appearances()
+        if assignment:
+            return positive_purity
+        else:
+            return 1-positive_purity
+
+    def weighted_purity(self, assignment):
+        return self.dlis(assignment) * self.relative_appearances(assignment)
+
+    def __init__(self, index, metric):
+
+        self.metrics = {
+            DLIS: self.dlis,
+            RELATIVE_APPEARANCES: self.relative_appearances,
+            WEIGHTED_PURITY: self.weighted_purity
+        }
+
         self.org_index = index
         self.index = index
         self.affirmations = []
@@ -21,9 +45,7 @@ class Variable:
         self.covariance_matrix_statistic_false = 0
         self.instance_num_clauses = 0
         self.reason_for_assignment = 0
-        self.unit = False
-        self.obsolete = False
-        self.post_solution = False
+        self.metric = self.metrics[metric.lower()]
 
     def get_heuristic(self, verbose=False):
         if self.pure():
@@ -43,15 +65,7 @@ class Variable:
         self.major_literal = assignment
 
     def get_metric(self, assignment):
-        if self.pure():
-            if assignment:
-                return self.num_affirmations
-            else:
-                return self.num_negations
-        if assignment:
-            return self.num_affirmations #* (self.num_affirmations / self.appearances())
-        else:
-            return self.num_negations #* (self.num_negations / self.appearances())
+        return self.metric(assignment)
 
     def get_clause_mean_size(self, affirmation):
         if affirmation:
@@ -66,13 +80,6 @@ class Variable:
         else:
             metrics = self.negation_statistics[CLAUSE_SUMMARY_STATS]
         return metrics[CLAUSE_MIN_SIZE]
-
-    def get_clause_median_size(self, affirmation):
-        if affirmation:
-            metrics = self.affirmation_statistics[CLAUSE_SUMMARY_STATS]
-        else:
-            metrics = self.negation_statistics[CLAUSE_SUMMARY_STATS]
-        return metrics[CLAUSE_MEDIAN_SIZE]
 
     def calculate_clause_summary_statistics(self):
         self.affirmation_statistics[CLAUSE_SUMMARY_STATS], self.negation_statistics[CLAUSE_SUMMARY_STATS] = {}, {}
@@ -113,18 +120,6 @@ class Variable:
     def purity(self):
         major_literal = max([self.num_negations, self.num_affirmations])
         return major_literal/self.appearances()
-
-    def score(self):
-        if self.unit:
-            return -2
-        if self.pure():
-            return -3
-        if self.obsolete:
-            return -4
-        if self.post_solution:
-            return -5
-        return self.get_heuristic()
-
 
     def __gt__(self, other):
         if self.pure() and not other.pure():
