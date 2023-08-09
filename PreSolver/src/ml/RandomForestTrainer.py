@@ -1,27 +1,36 @@
+import os
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, RocCurveDisplay, roc_curve, auc, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
-from SATfeatPy.sat_instance.sat_instance import *
 import matplotlib.pyplot as plt
 import numpy as np
+import joblib
+import argparse
 
 TRAIN, TEST = "train", "test"
-INTERMEDIARY_FILENAME = "PreSolver/instances/intermediary/shadow_cnf_features.txt"
+INTERMEDIARY_FILENAME = "../instances/intermediary/shadow_cnf_features.txt"
 
-class SAT_RFC:
+class RandomForestTrainer:
 
-    def __init__(self, dataset="cbs_dpll_50.txt", dpll=True):
-        self.filename = "PreSolver/instances/rfc/" + dataset
+    def __init__(self, name, dataset):
+        self.name = name
+        self.filename = "..\\..\\instances\\rfc\\" + dataset
+        print(f"Current WD: {os.getcwd()}")
         self.model = RandomForestClassifier(n_estimators=250, max_depth=8)
         self.data = pd.read_csv(self.filename, header=0).drop(["filename"], axis=1)
-        self.dpll=dpll
+        self.split()
 
+    def split(self):
         # Split predictors and label
         predictors, label = self.data.loc[:, self.data.columns[:-1]],self.data.loc[:, self.data.columns[-1:]]
         self.x_train, self.x_test, self.y_train,  self.y_test = train_test_split(predictors, label, test_size=0.20, shuffle=True)
-
+    def train(self):
         self.model.fit(X=self.x_train, y=self.y_train["sat"].ravel())
+
+    def save(self):
+        joblib.dump(self.model, f"../../classifiers/{self.name}.joblib")
 
     def test_accuracy(self):
         # test
@@ -56,37 +65,17 @@ class SAT_RFC:
         fig.tight_layout()
         plt.show()
 
-    def predict_shadow_cnfs(self, shadow_cnf_filenames):
-        self.write_satfeatpy_features_to_file(shadow_cnf_filenames)
-        test_data = pd.read_csv(INTERMEDIARY_FILENAME, header=0)
-        predictions = self.model.predict_proba(test_data)
-        return {
-            "true":predictions[0][1],
-            "false":predictions[1][1]
-        }
-
-    def predict_sat(self, cnf_filename):
-        self.write_satfeatpy_features_to_file([cnf_filename])
-        features = pd.read_csv(INTERMEDIARY_FILENAME, header=0)
-        predictions = self.model.predict_proba(features)
-        return predictions[0][1]
-
-    def write_satfeatpy_features_to_file(self, filename_list):
-        info = ",".join(list(self.data.drop("sat", axis=1).columns.values))
-        for filename in filename_list:
-            info += "\n"
-            feats = SATInstance(filename, preprocess=False)
-            feats.gen_basic_features()
-            if self.dpll:
-                feats.gen_dpll_probing_features()
-            info += ",".join([str(feats.features_dict[key]) for key in feats.features_dict.keys()])
-                              #if key not in ["v","c"]])
-
-        shadow_cnf_features = open(INTERMEDIARY_FILENAME, "w")
-        shadow_cnf_features.write(info)
-        shadow_cnf_features.close()
-
 if __name__=='__main__':
-    rfc = SAT_RFC()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d","--dataset", required=True, type=str)
+    parser.add_argument("-n", "--name", required=True, type=str)
 
-    rfc.test_accuracy()
+    args = parser.parse_args()
+    # Amend this list when a new metric is added
+    random_forest_trainer = RandomForestTrainer(
+        args.name,
+        args.dataset
+    )
+    random_forest_trainer.train()
+    random_forest_trainer.save()
+

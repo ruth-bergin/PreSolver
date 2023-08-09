@@ -3,20 +3,17 @@ import os
 
 from VariableSelector import VariableSelector
 from SATInstance.CNF import CNF
-from ml.RandomForest import SAT_RFC
-from os import listdir
+from ml.RandomForest import RandomForest
 
-#VARIABLE_SELECTION_HEURISTICS={"DLIS":dlis}
-
-def train_classifier(classifier, training_set):
+def train_classifier(classifier):
     if classifier=="rfcBase":
-        return SAT_RFC(training_set, dpll=False)
+        return RandomForest(f"../classifiers/{classifier}.joblib", dpll=False)
     elif classifier=="rfcDpll":
-        return SAT_RFC(training_set, dpll=True)
+        return RandomForest(f"../classifiers/{classifier}.joblib", dpll=True)
     else:
         raise ValueError("Unrecognised classifier")
-def main(classifier_selection, training_set, folder, variable_selection):
-    classifier = train_classifier(classifier_selection, training_set)
+def main(classifier_selection, folder, variable_selection):
+    classifier = train_classifier(classifier_selection)
     output_folder = f"{classifier_selection}_predictions"
     path = f"PreSolver/instances/{folder}/"
 
@@ -24,13 +21,13 @@ def main(classifier_selection, training_set, folder, variable_selection):
     folders_to_clear = [output_folder]
     for f in folders_to_clear:
         if os.path.isdir(f"{path}{f}"):
-            for file in listdir(f"{path}{f}"):
+            for file in os.listdir(f"{path}{f}"):
                 os.remove(f"{path}{f}/{file}")
             print(f"{path}{f} cleared")
         else:
             print(f"Making directory {path}{f}")
             os.mkdir(f"{path}{f}")
-    for index, filename in enumerate(listdir(path)):
+    for index, filename in enumerate(os.listdir(path)):
         if filename[-4:]!=".cnf":
             continue
         file = open(path+filename, "r")
@@ -58,7 +55,6 @@ def main(classifier_selection, training_set, folder, variable_selection):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--classifier", required=True, type=str)
-    parser.add_argument("-t","--trainingSet", required=True, type=str)
     parser.add_argument("-d","--dataset", required=True, type=str)
     parser.add_argument("-v", "--variableSelection", required=True, type=str)
 
@@ -69,7 +65,6 @@ if __name__ == "__main__":
                          "[dlis|weighted_purity|relative_appearances]")
     main(
         args.classifier,
-        args.trainingSet,
         args.dataset,
         args.variableSelection
     )

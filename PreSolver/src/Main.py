@@ -3,26 +3,16 @@ from random import randint,choice
 
 from SATInstance.CNF import CNF
 from ml.DatasetPopulator import DatasetPopulator
+from ml.RandomForest import RandomForest
 from os import listdir
 import wget
 import lzma
+import joblib
 
-def truncate_instances():
-    path = "../instances/satcomp/instances/"
 
-    for file in os.listdir(path):
-        nvar = int(file[file.find("_n")+2:file.find("_m")])
-        if nvar<=1000:
-            print(nvar)
-            fn = open(path+file,"r")
-            src = fn.read()
-            fn.close()
-            dst = open(f"../instances/sat_comp_refined/{file}", "w")
-            dst.write(src)
-            dst.close()
 
 def extract_dataset(path):
-    for i,file in enumerate(listdir(path)[412:]):
+    for i,file in enumerate(listdir(path)):
         index = i + 412
         try:
             with lzma.open(path+file, mode='rt', encoding='utf-8') as fid:
