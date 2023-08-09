@@ -101,16 +101,16 @@ class SATModel:
 
     def _build_network(self):
         with tf.name_scope("train_data"):
-            num_vars = self.input_num_vars = tf.compat.v1.placeholder(
+            num_vars = self.input_num_vars = tf.placeholder(
                 tf.int64, shape=[], name="input_num_vars"
             )
-            num_clauses = self.input_num_clauses = tf.compat.v1.placeholder(
+            num_clauses = self.input_num_clauses = tf.placeholder(
                 tf.int64, shape=[], name="input_num_clauses"
             )
-            labels = self.input_labels = tf.compat.v1.placeholder(
+            labels = self.input_labels = tf.placeholder(
                 tf.int64, shape=[None], name="input_labels"
             )
-            edges = self.input_edges = tf.compat.v1.placeholder(
+            edges = self.input_edges = tf.placeholder(
                 tf.int64, shape=[None, 2], name="input_edges"
             )
 
@@ -148,7 +148,7 @@ class SATModel:
                 ]
                 self.optimize = optimizer.apply_gradients(grads)
             with tf.name_scope("train_summary"):
-                self.summary_ph = tf.compat.v1.placeholder(dtype=tf.float32, shape=[])
+                self.summary_ph = tf.placeholder(dtype=tf.float32, shape=[])
                 self.summary = tf.summary.scalar("loss", self.summary_ph)
                 self.summary_percision = tf.summary.scalar("percision", self.summary_ph)
                 histogram_list = []
