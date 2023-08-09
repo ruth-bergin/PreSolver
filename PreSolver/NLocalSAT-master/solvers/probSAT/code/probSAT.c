@@ -18,7 +18,7 @@
 #include <signal.h>
 
 
-#define USE_PREDICT
+// #define USE_PREDICT
 
 #ifdef USE_PREDICT
 int *network_predict;
@@ -263,7 +263,7 @@ void parseFile() {
 	fscanf(fpredict, "%d %d %lf", &predict_num_vars, &predict_num_clauses, &predict_time);
 	if(predict_num_vars != numVars)
 	{
-		printf("c Wrong Predict File");
+		printf("c Wrong Predcit File");
 		exit(-1);
 	}
 
