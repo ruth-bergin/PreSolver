@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    input_folder = path = f"PreSolver/PreSolver/instances/{args.dataset}/results_{args.experiment}_{args.randomisationProb}/"
+    input_folder = path = f"PreSolver/instances/{args.dataset}/results_{args.experiment}_{args.randomisationProb}/"
     if "/" in args.dataset:
         raise ValueError("Restructure folders so instances are not in subfolder.")
     output_file = f"results/{args.dataset}_{args.experiment}_{args.randomisationProb}_results.txt"

@@ -30,7 +30,7 @@ if [ $# -lt 3 ]; then
     randomisationProb=$3
 fi
 
-instance_folder="PreSolver/PreSolver/instances/${dataset}/"
+instance_folder="PreSolver/instances/${dataset}/"
 
 if [ $initialisation = "control" ]; then
   output_folder="${instance_folder}results_control_0/"
@@ -39,7 +39,7 @@ else
   output_folder="${instance_folder}results_${initialisation}_${randomisationProb}/"
 fi
 
-solver="PreSolver/PreSolver/probSAT-master/probSAT"
+solver="PreSolver/probSAT-master/probSAT"
 
 if [ -d "$output_folder" ]; then
   rm -r "$output_folder"
