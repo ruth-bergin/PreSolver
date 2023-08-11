@@ -14,7 +14,7 @@ python gen_solve.py \
     -N 16
 
 python gen_solve.py \
-    -i "${DATA_FOLDER}/vaildation" \
+    -i "${DATA_FOLDER}/validation" \
     -b "/home/zwj/new-solvers" \
     -s MapleLCMDistChronoBT gluHack CCAnr \
     -t 600 \

@@ -1,0 +1,30 @@
+
+c instance name       :  PreSolver/PreSolver/instances/dataset_final_sat/sat_op_10_24_99728.cnf
+c number of variables :  10
+c number of literals  :  20
+c number of clauses   :  24
+c max. clause length  :  3
+
+c probSAT parameteres: 
+c using:              : only break          
+c using:              : polynomial function 
+c cb                  : 2.060000
+c function:           : probsBreak[break]*probsMake[make] = pow((eps + break), -cb);
+c eps                 : 0.900000
+c using:              : no caching of break values
+
+c general parameteres: 
+c maxTries            : 9223372036854775807
+c maxFlips            : 9223372036854775807
+c seed                : 1691587295
+c -->Starting solver  : 
+
+c EndStatistics:
+c numFlips                      : 3        
+c avg. flips/variable           : 0.30    
+c avg. flips/clause             : 0.12    
+c flips/sec                     : inf     
+c CPU Time                      : 0.0000  
+c Number of tries		: 1
+s SATISFIABLE
+v 1 2 3 -4 -5 -6 -7 -8 -9 -10 

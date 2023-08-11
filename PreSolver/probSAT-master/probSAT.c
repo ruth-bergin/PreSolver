@@ -621,13 +621,13 @@ void parseParameters(int argc, char *argv[]) {
 	static struct option long_options[] =
 			{ { "fct", required_argument, 0, 'f' }, { "caching", required_argument, 0, 'c' }, { "eps", required_argument, 0, 'e' },
 			{ "cb", required_argument, 0, 'b' }, { "runs", required_argument, 0, 't' }, { "maxflips", required_argument, 0, 'm' },
-			{ "printSolution", no_argument, 0, 'a' }, { "initialisation", required_argument, 0, 'i' },
-			{ "help", no_argument, 0, 'h' }, {"initRandomisation", required_argument, 0, 'r'}, { 0, 0, 0, 0 } };
+			{ "printSolution", no_argument, 0, 'a' }, { "initialisation", required_argument, 0, 'i' },  {"initRandomisation", required_argument, 0, 'r'}, 
+			{ "help", no_argument, 0, 'h' },{ 0, 0, 0, 0 } };
 
 	while (optind < argc) {
 		int index = -1;
 		struct option * opt = 0;
-		int result = getopt_long(argc, argv, "f:e:c:b:t:m:i:ah", long_options, &index); //
+		int result = getopt_long(argc, argv, "f:e:c:b:t:m:i:r:ah", long_options, &index); //
 		if (result == -1)
 			break; /* end of list */
 		switch (result) {
@@ -668,7 +668,7 @@ void parseParameters(int argc, char *argv[]) {
 		    initFileName = optarg;
 		    break;
 		case 'r': // custom randomisation parameter
-		    initProb = 1 - atoi(optarg);
+		    initProb = 1 - atoi(optarg)/100.0;
 		    break;
 		case 0: /* all parameter that do not */
 			/* appear in the opt string */
@@ -773,6 +773,7 @@ int main(int argc, char *argv[]) {
 	setupSignalHandler();
 	printSolverParameters();
 	srand(seed);
+ 
 
 	for (try = 0; try < maxTries; try++) {
 		init();

@@ -43,6 +43,7 @@ def main(input_folder, output_folder, load_model, gpu_list, logfile, input_file=
 
 
 if __name__ == "__main__":
+    print(f"WD: {os.getcwd()}")
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_folder", required=True, type=str)
     parser.add_argument("-o", "--output_folder", default=None, type=str)

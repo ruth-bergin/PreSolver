@@ -1,0 +1,29 @@
+
+c instance name       :  PreSolver/PreSolver/instances/dataset_final_sat/sat_subsetcard_16_240_64525.cnf
+c number of variables :  16
+c number of literals  :  32
+c number of clauses   :  240
+c max. clause length  :  5
+
+c probSAT parameteres: 
+c using:              : only break          
+c using:              : exponential function
+c cb                  : 3.700000
+c function:           : probsBreak[break]*probsMake[make] = pow(cb, -break);
+c using:              : caching of break values
+
+c general parameteres: 
+c maxTries            : 9223372036854775807
+c maxFlips            : 9223372036854775807
+c seed                : 1691587296
+c -->Starting solver  : 
+
+c EndStatistics:
+c numFlips                      : 6        
+c avg. flips/variable           : 0.38    
+c avg. flips/clause             : 0.03    
+c flips/sec                     : inf     
+c CPU Time                      : 0.0000  
+c Number of tries		: 1
+s SATISFIABLE
+v 1 -2 -3 4 5 -6 -7 8 -9 10 -11 12 13 -14 15 -16 
