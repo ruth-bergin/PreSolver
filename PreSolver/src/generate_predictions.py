@@ -15,7 +15,7 @@ def train_classifier(classifier):
 def main(classifier_selection, folder, variable_selection):
     classifier = train_classifier(classifier_selection)
     output_folder = f"{classifier_selection}_predictions"
-    path = f"PreSolver/instances/{folder}/"
+    path = f"../instances/{folder}/"
 
     print("Cleaning up folders")
     folders_to_clear = [output_folder]

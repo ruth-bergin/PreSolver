@@ -1,3 +1,5 @@
+from collections import Counter
+
 from pysat.solvers import Solver
 
 from SATInstance.Clause import Clause
@@ -167,30 +169,31 @@ class CNF:
         self.num_clauses -= 1
 
     def propagate_units(self):
-        i = 0
         if len(self.unary_clauses) == 0:
             if self.verbose:
                 print("No unit clauses to propagate.")
             return 1
-        if len(self.unary_clauses) > 0:
-            i += 1
-            if self.verbose:
-                print(
-                    f"Current unary clause list: {[str(clause) for clause in self.unary_clauses]}")
-            clause = self.unary_clauses[-1]
-            if not clause.removed:
-                variable, assignment = clause.literals[0][0], clause.literals[0][1] > 0
-                if not variable.removed:
-                    success = self.assign_variable(variable, assignment, -2)
-                    if success != 0:
-                        if self.verbose:
-                            print("Failed to assign unit clause. Aborting.")
-                        return -1
-                elif self.verbose:
-                    raise ValueError(f"Clause {clause} has not been removed already, but its literal {variable.index} has")
+
+        if self.verbose:
+            print(
+                f"Current unary clause list: {[str(clause) for clause in self.unary_clauses]}")
+        attribute_count = Counter(clause.literals[0] for clause in self.unary_clauses)
+        max_attribute_value = max(attribute_count, key=attribute_count.get)
+        clause = next((clause for clause in self.unary_clauses
+                       if clause.literals[0] == max_attribute_value), None)
+        if not clause.removed:
+            variable, assignment = clause.literals[0][0], clause.literals[0][1] > 0
+            if not variable.removed:
+                success = self.assign_variable(variable, assignment, -2)
+                if success != 0:
+                    if self.verbose:
+                        print("Failed to assign unit clause. Aborting.")
+                    return -1
             elif self.verbose:
-                print(f"Clause {clause} has been removed already, skipping")
-            self.unary_clauses.remove(clause)
+                raise ValueError(f"Clause {clause} has not been removed already, but its literal {variable.index} has")
+        elif self.verbose:
+            print(f"Clause {clause} has been removed already, skipping")
+        self.unary_clauses.remove(clause)
         return 0
 
     def assign_literal_by_integer(self, integer, reason=0):
