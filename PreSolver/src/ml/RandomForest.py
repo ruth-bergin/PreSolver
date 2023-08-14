@@ -1,5 +1,5 @@
 import pandas as pd
-from src.SATfeatPy.sat_instance.sat_instance import *
+from SATfeatPy.sat_instance.sat_instance import *
 import joblib
 
 TRAIN, TEST = "train", "test"
