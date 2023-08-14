@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    output_folder = args.output_folder or args.input_folder.rstrip("/") + "-predict"
+    output_folder = args.output_folder or args.input_folder + "predictions_nlocalsat"
     main(
         args.input_folder,
         output_folder,

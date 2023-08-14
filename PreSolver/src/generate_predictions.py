@@ -12,9 +12,10 @@ def train_classifier(classifier):
         return RandomForest(f"../classifiers/{classifier}.joblib", dpll=True)
     else:
         raise ValueError("Unrecognised classifier")
+        
 def main(classifier_selection, folder, variable_selection):
     classifier = train_classifier(classifier_selection)
-    output_folder = f"{classifier_selection}_predictions"
+    output_folder = f"predictions_{classifier_selection}"
     path = f"../instances/{folder}/"
 
     print("Cleaning up folders")

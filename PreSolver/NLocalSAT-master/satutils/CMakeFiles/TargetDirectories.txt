@@ -1,3 +1,0 @@
-/home/rbergin/PreSolver/PreSolver/NLocalSAT-master/satutils/CMakeFiles/satutils.dir
-/home/rbergin/PreSolver/PreSolver/NLocalSAT-master/satutils/CMakeFiles/edit_cache.dir
-/home/rbergin/PreSolver/PreSolver/NLocalSAT-master/satutils/CMakeFiles/rebuild_cache.dir

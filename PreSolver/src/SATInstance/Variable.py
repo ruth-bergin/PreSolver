@@ -53,8 +53,8 @@ class Variable:
                 print(f"Pure literal {self.major_literal}, returning number of appearances")
             return self.appearances()
         self.calculate_clause_summary_statistics()
-        affirmation_metric = self.get_metric(True) #*self.covariance_matrix_statistic_true
-        negation_metric = self.get_metric(False) #*self.covariance_matrix_statistic_false
+        affirmation_metric = self.get_metric(True)
+        negation_metric = self.get_metric(False)
         if affirmation_metric>negation_metric:
             self.set_major_literal(True)
         else:
@@ -121,28 +121,27 @@ class Variable:
         major_literal = max([self.num_negations, self.num_affirmations])
         return major_literal/self.appearances()
 
+    def covariance(self):
+        return max(self.covariance_matrix_statistic_false, self.covariance_matrix_statistic_true)
+
     def __gt__(self, other):
-        if self.pure() and not other.pure():
-            return True
-        if (not self.pure()) and other.pure():
-            return False
+        #if self.pure() and not other.pure():
+        #    return True
+        #if (not self.pure()) and other.pure():
+        #    return False
         diff = self.get_heuristic() - other.get_heuristic()
         if diff==0:
-            if self.purity()==other.purity():
-                return self.get_clause_min_size(self.major_literal) < other.get_clause_min_size(other.major_literal)
-            return self.purity() > other.purity()
+            return self.covariance() > other.covariance()
         return diff > 0
 
     def __lt__(self, other):
-        if (not self.pure()) and other.pure():
-            return True
-        if self.pure() and not other.pure():
-            return False
+        #if (not self.pure()) and other.pure():
+        #    return True
+        #if self.pure() and not other.pure():
+        #    return False
         diff = self.get_heuristic() - other.get_heuristic()
         if diff==0:
-            if self.pure() and other.pure():
-                return self.get_clause_min_size(self.major_literal) > other.get_clause_min_size(other.major_literal)
-            return self.purity() > other.purity()
+            return self.covariance() > other.covariance()
         return diff < 0
 
     def __str__(self):

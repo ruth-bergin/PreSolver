@@ -9,12 +9,12 @@ def main(input_folder):
 
         if len(assignment)==1:
             raise ValueError("Already collated.")
-
-        print(assignment[0])
-        print(len(assignment)-2)
-        newfile = open(input_folder+filename, "w")
+            
+        newfile = open(input_folder+filename[:-3]+"txt", "w")
         newfile.write("".join(assignment[2:]))
         newfile.close()
+        
+        os.remove(input_folder+filename)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -22,9 +22,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    input_folder = path = f"PreSolver/instances/{args.dataset}/nlocalsat_predictions/"
-    if "/" in args.dataset:
-        raise ValueError("Restructure folders so instances are not in subfolder.")
+    input_folder = path = f"PreSolver/instances/{args.dataset}/predictions_nlocalsat/"
     main(
         input_folder
     )

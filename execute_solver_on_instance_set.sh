@@ -39,7 +39,7 @@ else
   output_folder="${instance_folder}results_${initialisation}_${randomisationProb}/"
 fi
 
-solver="PreSolver/probSAT-master/probSAT"
+solver="PreSolver/solvers/probSAT-master/probSAT"
 
 if [ -d "$output_folder" ]; then
   rm -r "$output_folder"
@@ -52,7 +52,7 @@ for file in "$instance_folder"*.cnf; do
   if [ $initialisation = "control" ]; then
     "$solver" -a "$file" > "${output_folder}${filename}.txt"
   else
-      initialisation_file="${instance_folder}/${initialisation}_predictions/${filename}.txt"
+      initialisation_file="${instance_folder}${initialisation}_predictions/${filename}.txt"
       "$solver" -a -i "$initialisation_file" -r "$randomisationProb" "$file" > "${output_folder}${filename}.txt"
   fi
 done
