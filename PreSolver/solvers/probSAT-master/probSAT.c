@@ -773,11 +773,13 @@ int main(int argc, char *argv[]) {
 	setupSignalHandler();
 	printSolverParameters();
 	srand(seed);
- 
+
 
 	for (try = 0; try < maxTries; try++) {
 		init();
 		bestNumFalse = numClauses;
+		if (totalTime > 180)
+		    break;
 		for (flip = 0; flip < maxFlips; flip++) {
 			if (numFalse == 0)
 				break;
@@ -807,4 +809,3 @@ int main(int argc, char *argv[]) {
 		printf("c %-30s: %-8.3fsec\n", "Mean time per try", totalTime / (double) try);
 	return 0;
 }
-

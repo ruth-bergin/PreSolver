@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    input_folder = path = f"PreSolver/instances/{args.dataset}/predictions_nlocalsat/"
+    input_folder = path = f"PreSolver/instances/{args.dataset}/nlocalsat_predictions/"
     main(
         input_folder
     )

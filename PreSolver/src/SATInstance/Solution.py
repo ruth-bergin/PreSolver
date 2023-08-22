@@ -21,6 +21,9 @@ class Solution:
         if reason!=0:
             variable.reason_for_assignment=reason
         literal = self.get_var_as_int(variable, assignment)
+        if literal*-1 in self.assignments or literal in self.assignments:
+            raise ValueError(f"Attempting to assign value that's already processed.\n"
+                             f"{str(self)}")
         self.assignments.append((variable,assignment))
         self.handle_clause_removal_and_reduction(literal)
         self.add_unit_clause(literal, round(variable.reason_for_assignment))

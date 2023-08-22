@@ -13,7 +13,7 @@ def main(input_folder, output_folder, load_model, gpu_list, logfile, input_file=
     predict = sat_predict.SATPredict(gpu_list, load_model)
 
     if not input_file:
-        problems = os.listdir(input_folder)
+        problems = [file for file in os.listdir(input_folder) if file[-4:]==".cnf"]
         problems = sorted(problems)
     else:
         problems = [input_file]
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    output_folder = args.output_folder or args.input_folder + "predictions_nlocalsat"
+    output_folder = args.output_folder or args.input_folder + "nlocalsat_predictions"
     main(
         args.input_folder,
         output_folder,

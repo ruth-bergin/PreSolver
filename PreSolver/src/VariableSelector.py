@@ -20,6 +20,7 @@ class VariableSelector:
         self.assignment_complete = False
 
     def run(self, to_failure=False, single_path=False):
+        self.update_solution()
         better_option_sat_probability = self.cutoff + 0.1
         first_pass = True
         branches_sat_probability, assignment = None, None
@@ -30,6 +31,7 @@ class VariableSelector:
             print("Running first pass")
         branches_sat_diff=1
         while better_option_sat_probability > self.cutoff:
+            print(f"Vars left:\t{self.cnf.num_variables}.")
             i += 1
             if self.verbose:
                 print(f"CNF currently has {self.cnf.num_variables} literals "
@@ -40,14 +42,14 @@ class VariableSelector:
                           .format(better_option_sat_probability, self.cutoff))
                 self.cnf.assign_literal_by_integer(branches_sat_probability[VARIABLE].index*assignment)
                 self.update_solution()
-                if to_failure:
-                    if not self.cnf.solve():
-                        return 0, self.cnf
+                #if to_failure:
+                #    if not self.cnf.solve():
+                #        return 0, self.cnf
                 self.assignments += 1
             else:
                 first_pass = False
-            if not self.cnf.solve() and self.assignments_to_failure == 0:
-                self.assignments_to_failure = self.assignments
+            #if not self.cnf.solve() and self.assignments_to_failure == 0:
+            #    self.assignments_to_failure = self.assignments
             branches_sat_probability = self.branch_cnf()
             branches_sat_diff = round(abs(branches_sat_probability[TRUE]-branches_sat_probability[FALSE]),2)
             # If ignoring conflicts:

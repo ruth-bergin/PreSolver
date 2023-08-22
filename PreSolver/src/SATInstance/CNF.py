@@ -27,7 +27,7 @@ class CNF:
         self.update_covariance_matrix_statistics()
         if self.verbose:
             print("Solving")
-        self.sat = self.solve()
+        self.sat = True #self.solve()
         if self.verbose:
             print(f"Propagating from __init__() with unary clauses {[clause.index for clause in self.unary_clauses]}")
         self.propagate_units()
@@ -123,11 +123,6 @@ class CNF:
         satisfied_clauses, unsatisfied_clauses = variable.negations, variable.affirmations
         if assignment:
             satisfied_clauses, unsatisfied_clauses = variable.affirmations, variable.negations
-        if self.verbose:
-            print(
-                f"Assigned literal {variable.index} so removing clauses {[str(clause) for clause in satisfied_clauses]}")
-        if len(satisfied_clauses)==0 and self.verbose:
-            print(f"No clauses satisfied. Clauses unsatisfied: {[str(clause) for clause in unsatisfied_clauses]}")
         while len(satisfied_clauses)>0:
             clause = satisfied_clauses[-1]
             if clause.removed:
@@ -137,9 +132,6 @@ class CNF:
                     f"Infeasible assignment - literal {variable.index} not in clause {clause} so cannot satisfy it.\n"
                     f"Check for other clauses: {[(variable, self.get_sign_from_bool(assignment)) in clause.literals for clause in satisfied_clauses]}")
             self.remove_clause(clause)
-        if self.verbose:
-            print(
-                f"Assigned literal {variable.index} so reducing clauses {[str(clause) for clause in unsatisfied_clauses]}")
         for clause in unsatisfied_clauses:
             if clause.removed:
                 raise ValueError(f"Clause has {clause} been removed.")
@@ -176,7 +168,7 @@ class CNF:
 
         if self.verbose:
             print(
-                f"Current unary clause list: {[str(clause) for clause in self.unary_clauses]}")
+                f"Current unary clause list: {[clause.literals[0].index for clause in self.unary_clauses]}")
         attribute_count = Counter(clause.literals[0] for clause in self.unary_clauses)
         max_attribute_value = max(attribute_count, key=attribute_count.get)
         clause = next((clause for clause in self.unary_clauses
@@ -190,9 +182,9 @@ class CNF:
                         print("Failed to assign unit clause. Aborting.")
                     return -1
             elif self.verbose:
-                raise ValueError(f"Clause {clause} has not been removed already, but its literal {variable.index} has")
+                raise ValueError(f"Clause {clause.index} has not been removed already, but its literal {variable.index} has")
         elif self.verbose:
-            print(f"Clause {clause} has been removed already, skipping")
+            print(f"Clause {clause.index} has been removed already, skipping")
         self.unary_clauses.remove(clause)
         return 0
 
@@ -212,16 +204,26 @@ class CNF:
         success = self.rearrange()
         if self.verbose:
             print(f"Completed run of assignment of {integer} with success {success}")
-            print(f"Satisfiability: {self.solve()}")
-        self.check_for_literal_clause_inconsistency()
+        if success==0:
+            self.check_for_literal_clause_inconsistency()
         if not self.ignore_conflicts:
-            self.check_for_sat_violation()
-        if not self.solved:
+            pass
+            # self.check_for_sat_violation()
+        if not self.solved and success==0:
             self.update_covariance_matrix()
             self.update_covariance_matrix_statistics()
         self.assignments += self.temp_assignments
         self.temp_assignments = []
         return success
+
+    def assign_literal_by_original_integer(self, integer):
+        sign = integer//abs(integer)
+        for var in self.variables:
+            if var.org_index==abs(integer):
+                return self.assign_literal_by_integer(sign*var.index)
+        if self.verbose:
+            print(f"Variable with original index {abs(integer)} no longer present in CNF.")
+        return 2
 
     def check_for_literal_clause_inconsistency(self):
         variables_still_contain_clauses, clauses_still_contain_literals = 0, 0
@@ -303,12 +305,14 @@ class CNF:
         if self.verbose:
             print("Propagating from rearrange()")
         success = self.propagate_units()
-        if success == 0:
-            if self.verbose:
-                print("Propagating from rearrange() at depth")
-            return self.rearrange()
-        elif success < 0:
+        propagated = False
+        while success == 0:
+            propagated = True
+            success = self.propagate_units()
+        if success < 0:
             return -1
+        elif propagated:
+            return self.rearrange()
         for variable in self.variables:
             variable.instance_num_clauses = self.num_clauses
         for variable in self.variables:
@@ -325,6 +329,7 @@ class CNF:
         return len(new_obsolete_variables)>0
 
     def check_for_sat_violation(self):
+        pass
         if not self.sat and self.solve():
             raise ValueError("Unsat problem made sat through assignment.")
 

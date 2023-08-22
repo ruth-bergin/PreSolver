@@ -50,10 +50,10 @@ for file in "$instance_folder"*.cnf; do
   filename=$(basename "$file" .cnf)
   echo "On file ${filename}"
   if [ $initialisation = "control" ]; then
-    "$solver" -a "$file" > "${output_folder}${filename}.txt"
+    "$solver" -m 10000 -a "$file" > "${output_folder}${filename}.txt"
   else
       initialisation_file="${instance_folder}${initialisation}_predictions/${filename}.txt"
-      "$solver" -a -i "$initialisation_file" -r "$randomisationProb" "$file" > "${output_folder}${filename}.txt"
+      "$solver" -m 10000 -a -i "$initialisation_file" -r "$randomisationProb" "$file" > "${output_folder}${filename}.txt"
   fi
 done
 
