@@ -16,7 +16,7 @@ def train_classifier(classifier):
         
 def main(classifier_selection, folder, variable_selection):
     classifier = train_classifier(classifier_selection)
-    output_folder = f"predictions_{classifier_selection}"
+    output_folder = f"{classifier_selection}_{variable_selection}_predictions"
     path = f"../instances/{folder}/"
 
     print("Cleaning up folders")
