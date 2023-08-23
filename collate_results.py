@@ -4,22 +4,24 @@ import argparse
 def main(input_folder, output_file):
     print(f"Writing collated results to output file {output_file}")
     file = open(output_file, "w")
-    file.write("instance,tries,cpu_time\n")
+    file.write("instance,tries,cpu_time,solved\n")
     file.close()
     for filename in os.listdir(input_folder):
         fn = open(input_folder+filename, "r")
         messy = [line.strip("\n") for line in fn.readlines()]
         fn.close()
-        tries_index, cpu_index = -1,-1
+        tries, cpu_index = 0,-1
+        solved = False
         for index,line in enumerate(messy):
-            if "tries" in line:
-                tries_index = index
+            if "UNKNOWN" in line:
+                tries += 1
             elif "CPU Time" in line:
                 cpu_index = index
-        tries = messy[tries_index].split(" ")[-1]
+            elif "SATISFIABLE" in line:
+                solved = True
         cpu_time =[word for word in messy[cpu_index].strip("\n").split(" ") if word!=""][-1]
         out = open(output_file, "a")
-        out.write(f"{filename},{tries},{cpu_time}\n")
+        out.write(f"{filename},{tries},{cpu_time},{solved}\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

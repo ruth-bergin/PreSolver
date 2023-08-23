@@ -778,7 +778,7 @@ int main(int argc, char *argv[]) {
 	for (try = 0; try < maxTries; try++) {
 		init();
 		bestNumFalse = numClauses;
-		if (totalTime > 180)
+		if (totalTime > 1000)
 		    break;
 		for (flip = 0; flip < maxFlips; flip++) {
 			if (numFalse == 0)
