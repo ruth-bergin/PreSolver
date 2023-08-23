@@ -24,3 +24,9 @@ To execute a solver on an instance set:
 * Ensure every solver is compiled before execution.
 
 Output can be found in `results/{dataset}_{initialisation}_{randomisationProb}.txt`
+
+## Classifier Training Set Generation [INCOMPLETE]
+This method only produces SAT instances of various sizes. At this time I'm unable to think of a quick way to generate UNSAT partial assignments for challenging satisfiable instances.
+Given a dataset of SAT instances:
+- Run `execute_solver_on_instance_set.sh` with default configurations.
+- Run `PreSolver/src/drill_sat_assignment.py` to extrapolate a set of reduced, SAT instances for that dataset.
