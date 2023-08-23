@@ -30,10 +30,7 @@ def main(classifier_selection, folder, variable_selection):
             print(f"Making directory {path}{f}")
             os.mkdir(f"{path}{f}")
     files = [file for file in os.listdir(path) if file[-4:]==".cnf"]
-    sorted_files = sorted(files, key=lambda filename: int(filename[1:filename.index("_")]))
-    for index, filename in enumerate(sorted_files):
-        if index<30 or index%5!=0:
-            continue
+    for index, filename in enumerate(files):
         start = time.time()
         if filename[-4:]!=".cnf":
             continue
@@ -47,17 +44,10 @@ def main(classifier_selection, folder, variable_selection):
         except:
             cnf = CNF(cnf_string, metric=variable_selection, sep="  0 \n ", ignore_conflicts=True)
 
-        num_vars = int(filename[1:filename.index("_")])
-        print(num_vars)
         selector = VariableSelector(cnf, classifier, variable_selection, cutoff=-1, fn=f"{path}processed/{filename}")
         selector.run()
         solution = selector.solution.as_assignment(True)
-        print(f"Filename:\t\t{filename}\n"
-              f"org vars:\t\t{num_vars}\n"
-              f"solution length:\t{len(solution)}")
-        if len(solution)!=num_vars:
-            raise ValueError(f"Length of solution is {len(solution)} when it should be {num_vars}\n"
-                             f"{selector.solution}")
+              
         output = open(f"{path}/{output_folder}/{filename[:-4]}.txt", "w")
         output.write(solution)
         output.close()
