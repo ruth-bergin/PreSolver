@@ -23,4 +23,4 @@ To execute a solver on an instance set:
 * Currently only probSAT is configured for evaluation.  
 * Ensure every solver is compiled before execution.
 
-Output can be found in `results/{dataset}_{classifier}_{randomisationProb}.txt`
+Output can be found in `results/{dataset}_{initialisation}_{randomisationProb}.txt`
