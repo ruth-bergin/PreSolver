@@ -8,7 +8,7 @@ To generate predictions for an instance set, run `PreSolver/src/generate_predict
 | classifier                   | -c       | RfcBase \| RfcDpll                                      |
 | variable selection heuristic | -v       | dlis \| relative_appearances \| weighted_purity         |
 
-Output can be found in the folder `PreSolver/instances/{dataset}/{classifier}_predictions/`
+Output can be found in the folder `PreSolver/instances/{dataset}/{classifier}_{variable_selection}_predictions/`
 
 ## Evaluation
 To execute a solver on an instance set:  
@@ -16,7 +16,7 @@ To execute a solver on an instance set:
 | Argument                     | Default  | Currently accepted values                               |
 |------------------------------|----------|---------------------------------------------------------|
 | dataset                      | N/A      | basename of any folder with CNFs in PreSolver/instances |
-| initialisation               | control  | control \| any accepted classifier \| nlocalsat         |
+| initialisation               | control  | control \| {classifier}_{var selection} \| nlocalsat    |
 | mutation probability         | 25       | 0 - 100                                                 |
 
 * Predictions must be generated before this script can be executed - takes input from the above output.  
