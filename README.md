@@ -16,8 +16,8 @@ To execute a solver on an instance set:
 | Argument                     | Default  | Currently accepted values                               |
 |------------------------------|----------|---------------------------------------------------------|
 | dataset                      | N/A      | basename of any folder with CNFs in PreSolver/instances |
-| initialisation               | control  | control \| any accepted classifier                      |
-| variable selection heuristic | 25       | 0 - 100                                                 |
+| initialisation               | control  | control \| any accepted classifier \| nlocalsat         |
+| mutation probability         | 25       | 0 - 100                                                 |
 
 * Predictions must be generated before this script can be executed - takes input from the above output.  
 * Currently only probSAT is configured for evaluation.  
