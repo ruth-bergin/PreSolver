@@ -1,6 +1,7 @@
 from src.SATInstance.CNF import CNF
 from random import randint, choice
 
+# Somewhat obsolete: useful for populating a dataset of small easy instances.
 
 class DatasetPopulator:
 
