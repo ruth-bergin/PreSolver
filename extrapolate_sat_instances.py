@@ -36,7 +36,7 @@ def write_cnf(filename, i, nvar, working_clauses):
     string = f"p cnf {nvar} {len(working_clauses)}\n"
     for clause in working_clauses:
         string += " ".join([str(lit) for lit in clause]) + " 0\n"
-    file = open(f"{filename[:filename.index('.')]}_{i}_sat.cnf", "w")
+    file = open(f"{output_folder}{filename[:filename.index('.')]}_{i}_sat.cnf", "w")
     file.write(string)
     file.close()
 
