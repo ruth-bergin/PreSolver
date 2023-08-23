@@ -30,3 +30,7 @@ This method only produces SAT instances of various sizes. At this time I'm unabl
 Given a dataset of SAT instances:
 - Run `execute_solver_on_instance_set.sh` with default configurations.
 - Run `PreSolver/src/drill_sat_assignment.py` to extrapolate a set of reduced, SAT instances for that dataset.
+
+## NLocalSAT
+Execute `python gen_predict.py -i path/to/instance/folder -l path/to/saved/model` to generate predictions.
+Run `python collate_nlocalsat_predictions.py` to make them usable for `.execute_solver_on_instance_set.sh`.
